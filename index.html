@@ -60,6 +60,14 @@
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
+        .filter-select {
+            background-color: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            font-weight: 600;
+            color: #0d3b66;
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -109,6 +117,10 @@
 
         <section>
              <h3 class="text-2xl font-bold text-[#0d3b66] mb-4">Detalhamento dos Débitos</h3>
+             
+             <div id="column-filters" class="mb-4 p-4 bg-white rounded-lg shadow-md flex flex-wrap gap-4 items-center">
+             </div>
+
              <div class="table-container">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left text-gray-700">
@@ -220,20 +232,44 @@
             });
         };
 
-        const updateDashboard = (selectedCompany) => {
-            const filteredData = selectedCompany === 'Todas' ? allData : allData.filter(d => d.empresa === selectedCompany);
+        const updateDashboard = () => {
+            const selectedCompany = document.querySelector('.filter-btn.active').dataset.company;
+            
+            const filters = {
+                nomeDebito: document.getElementById('filter-nomeDebito').value,
+                competencia: document.getElementById('filter-competencia').value,
+                vencimento: document.getElementById('filter-vencimento').value,
+                situacao: document.getElementById('filter-situacao').value,
+            };
+
+            let filteredData = allData;
+
+            if (selectedCompany !== 'Todas') {
+                filteredData = filteredData.filter(d => d.empresa === selectedCompany);
+            }
+
+            Object.keys(filters).forEach(key => {
+                if (filters[key] !== 'Todos') {
+                    filteredData = filteredData.filter(d => d[key] === filters[key]);
+                }
+            });
 
             let total = 0, vencido = 0, aVencer = 0;
             const byType = {};
 
-            filteredData.forEach(d => {
+            const dataForKpi = (selectedCompany === 'Todas') ? allData : allData.filter(d => d.empresa === selectedCompany);
+            
+            dataForKpi.forEach(d => {
                 total += d.valor;
                 if (d.situacao === 'Vencido') vencido += d.valor;
                 else aVencer += d.valor;
-
+            });
+            
+            filteredData.forEach(d => {
                 if (!byType[d.tipo]) byType[d.tipo] = 0;
                 byType[d.tipo] += d.valor;
             });
+
 
             document.getElementById('kpi-total').textContent = formatCurrency(total);
             document.getElementById('kpi-vencido').textContent = formatCurrency(vencido);
@@ -250,10 +286,17 @@
             }];
             debtByTypeChart.update();
 
+            const statusData = filteredData.reduce((acc, d) => {
+                if (d.situacao === 'Vencido') acc.vencido += d.valor;
+                else acc.aVencer += d.valor;
+                return acc;
+            }, {vencido: 0, aVencer: 0});
+
+
             debtStatusChart.data.labels = ['Vencido', 'A Vencer'];
             debtStatusChart.data.datasets = [{
                 label: 'Status da Dívida',
-                data: [vencido, aVencer],
+                data: [statusData.vencido, statusData.aVencer],
                 backgroundColor: ['#e5383b', '#43aa8b'],
                 borderRadius: 4
             }];
@@ -279,7 +322,7 @@
             });
         };
 
-        const setupFilters = () => {
+        const setupCompanyFilters = () => {
             const companies = ['Todas', ...new Set(allData.map(d => d.empresa))];
             const filtersContainer = document.getElementById('filters');
             companies.forEach(company => {
@@ -290,17 +333,55 @@
                 button.addEventListener('click', () => {
                     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
-                    updateDashboard(company);
+                    updateDashboard();
                 });
                 filtersContainer.appendChild(button);
             });
             filtersContainer.querySelector('.filter-btn').classList.add('active');
         };
 
+        const setupColumnFilters = () => {
+            const filterContainer = document.getElementById('column-filters');
+            const filterColumns = {
+                nomeDebito: 'Nome do Débito',
+                competencia: 'Competência',
+                vencimento: 'Vencimento',
+                situacao: 'Situação'
+            };
+
+            Object.keys(filterColumns).forEach(key => {
+                const uniqueValues = ['Todos', ...new Set(allData.map(item => item[key]))];
+                
+                const label = document.createElement('label');
+                label.htmlFor = `filter-${key}`;
+                label.className = "font-semibold text-gray-600";
+                label.textContent = `${filterColumns[key]}:`;
+
+                const select = document.createElement('select');
+                select.id = `filter-${key}`;
+                select.className = "filter-select";
+                
+                uniqueValues.forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    select.appendChild(option);
+                });
+
+                select.addEventListener('change', updateDashboard);
+                
+                const wrapper = document.createElement('div');
+                wrapper.appendChild(label);
+                wrapper.appendChild(select);
+                filterContainer.appendChild(wrapper);
+            });
+        };
+
         window.onload = () => {
             setupCharts();
-            setupFilters();
-            updateDashboard('Todas');
+            setupCompanyFilters();
+            setupColumnFilters();
+            updateDashboard();
         };
 
     </script>
