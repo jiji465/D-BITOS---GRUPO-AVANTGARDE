@@ -3,210 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Fiscal Interativo</title>
+    <title>Dashboard Fiscal Sofisticado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #eef2f9;
+        :root {
+            --primary: #1e3a8a; /* Azul mais escuro */
+            --secondary: #3b82f6; /* Azul vibrante */
+            --background: #f1f5f9; /* Cinza claro */
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --border-color: #e2e8f0;
         }
-        .main-header {
-            background: #0d3b66;
-            color: #fafafa;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+        }
+        .sidebar {
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+        }
+        .sidebar-link {
+            transition: background-color 0.2s ease, color 0.2s ease;
+            color: #475569;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+        }
+        .sidebar-link.active i, .sidebar-link:hover i {
+            color: #ffffff;
         }
         .kpi-card {
-            background-color: #ffffff;
+            background-color: var(--card-bg);
             border-radius: 0.75rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.03), 0 1px 2px -1px rgba(0,0,0,0.03);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-color);
         }
         .kpi-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
         }
         .chart-card {
-            background-color: #ffffff;
+            background-color: var(--card-bg);
             border-radius: 0.75rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.03), 0 1px 2px -1px rgba(0,0,0,0.03);
             padding: 1.5rem;
-        }
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-        .filter-btn.active {
-            background-color: #0d3b66;
-            color: #ffffff;
-            box-shadow: 0 4px 8px rgba(13, 59, 102, 0.3);
-        }
-        .filter-btn:not(.active) {
-            background-color: #ffffff;
-            color: #0d3b66;
-            border-color: #0d3b66;
-        }
-        .table-header {
-            background-color: #0d3b66;
-            color: #ffffff;
+            border: 1px solid var(--border-color);
         }
         .table-container {
             border-radius: 0.75rem;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.03), 0 1px 2px -1px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+        }
+        .table-header th {
+            background-color: #f8fafc;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+        .table-header th:hover {
+            background-color: #f1f5f9;
         }
         .filter-select {
-            background-color: white;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            padding: 0.5rem;
-            font-weight: 600;
-            color: #0d3b66;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        .sort-icon {
+            opacity: 0.5;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .sort-icon.active {
+            opacity: 1;
+            color: var(--primary);
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="flex min-h-screen">
 
-    <header class="main-header p-6 shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold">Dashboard Fiscal - Grupo Avantgarde</h1>
-                <p class="text-blue-200">Visão detalhada e interativa dos débitos do grupo.</p>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar w-72 text-white flex-shrink-0 p-4 flex flex-col">
+        <div class="flex items-center gap-3 mb-10 px-2">
+            <div class="bg-blue-100 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check text-blue-800"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
             </div>
-            <div class="text-right">
-                <p class="text-xl font-semibold text-white">Sete Soluções Fiscais</p>
-            </div>
+            <h2 class="text-xl font-bold text-gray-800">Sete Fiscais</h2>
         </div>
-    </header>
+        <nav id="company-filters" class="flex flex-col gap-2 flex-1">
+             <h3 class="text-sm font-semibold text-gray-400 uppercase px-3 mt-4 mb-2">Empresas</h3>
+        </nav>
+    </aside>
 
-    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
-
-        <section id="filters" class="mb-8 p-4 bg-white rounded-full shadow-md inline-flex flex-wrap gap-2">
-        </section>
-
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="kpi-card p-6">
-                <h3 class="text-md font-semibold text-gray-500 uppercase">Dívida Total</h3>
-                <p id="kpi-total" class="text-4xl font-bold text-[#0d3b66] mt-2">R$ 0,00</p>
-            </div>
-            <div class="kpi-card p-6">
-                <h3 class="text-md font-semibold text-gray-500 uppercase">Total Vencido</h3>
-                <p id="kpi-vencido" class="text-4xl font-bold text-[#e5383b] mt-2">R$ 0,00</p>
-            </div>
-            <div class="kpi-card p-6">
-                <h3 class="text-md font-semibold text-gray-500 uppercase">Total a Vencer</h3>
-                <p id="kpi-avencer" class="text-4xl font-bold text-[#43aa8b] mt-2">R$ 0,00</p>
-            </div>
-        </section>
-
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div class="chart-card h-[450px]">
-                <h3 class="text-xl font-bold text-center text-[#0d3b66] mb-4">Composição da Dívida por Tipo</h3>
-                <canvas id="debtByTypeChart"></canvas>
-            </div>
-            <div class="chart-card h-[450px]">
-                <h3 class="text-xl font-bold text-center text-[#0d3b66] mb-4">Débitos Vencidos vs. A Vencer</h3>
-                <canvas id="debtStatusChart"></canvas>
-            </div>
-        </section>
-
-        <section>
-             <h3 class="text-2xl font-bold text-[#0d3b66] mb-4">Detalhamento dos Débitos</h3>
-             
-             <div id="column-filters" class="mb-4 p-4 bg-white rounded-lg shadow-md flex flex-wrap gap-4 items-center">
-             </div>
-
-             <div class="table-container">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-gray-700">
-                        <thead class="table-header text-xs uppercase">
-                            <tr>
-                                <th scope="col" class="px-6 py-3">Nome do Débito</th>
-                                <th scope="col" class="px-6 py-3">Competência</th>
-                                <th scope="col" class="px-6 py-3">Vencimento</th>
-                                <th scope="col" class="px-6 py-3">Situação</th>
-                                <th scope="col" class="px-6 py-3 text-right">Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody id="debt-table-body">
-                        </tbody>
-                    </table>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+        <header class="bg-white/80 backdrop-blur-lg border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-10">
+             <h1 class="text-2xl font-bold text-gray-800">Visão Geral Financeira</h1>
+             <div class="flex items-center gap-4">
+                <div class="relative">
+                    <select id="filter-situacao" class="filter-select bg-white border border-gray-300 text-gray-900 text-sm font-medium rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-10 py-2">
+                    </select>
                 </div>
              </div>
-        </section>
+        </header>
 
-    </main>
+        <main class="flex-1 p-8">
+            <!-- KPIs -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="kpi-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-md font-semibold text-gray-500 uppercase">Dívida Total</h3>
+                        <div class="bg-blue-100 p-2 rounded-md"><i data-lucide="landmark" class="text-blue-600"></i></div>
+                    </div>
+                    <p id="kpi-total" class="text-4xl font-bold text-gray-800">R$ 0,00</p>
+                </div>
+                <div class="kpi-card p-6">
+                     <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-md font-semibold text-gray-500 uppercase">Total Vencido</h3>
+                        <div class="bg-red-100 p-2 rounded-md"><i data-lucide="alert-circle" class="text-red-600"></i></div>
+                    </div>
+                    <p id="kpi-vencido" class="text-4xl font-bold text-red-600">R$ 0,00</p>
+                </div>
+                <div class="kpi-card p-6">
+                     <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-md font-semibold text-gray-500 uppercase">Total a Vencer</h3>
+                        <div class="bg-green-100 p-2 rounded-md"><i data-lucide="calendar-check" class="text-green-600"></i></div>
+                    </div>
+                    <p id="kpi-avencer" class="text-4xl font-bold text-green-600">R$ 0,00</p>
+                </div>
+            </section>
+
+            <!-- Charts -->
+            <section class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+                <div class="chart-card lg:col-span-2 h-[450px]">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Composição da Dívida por Tipo</h3>
+                    <canvas id="debtByTypeChart"></canvas>
+                </div>
+                <div class="chart-card lg:col-span-3 h-[450px]">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Débitos Vencidos vs. A Vencer</h3>
+                    <canvas id="debtStatusChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Table -->
+            <section>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Detalhamento dos Débitos</h3>
+                <div class="table-container bg-white">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <thead class="table-header">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4" data-sort-key="nomeDebito">
+                                        <div class="flex items-center gap-2">Nome do Débito <span class="sort-icon"></span></div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-4" data-sort-key="competencia">
+                                        <div class="flex items-center gap-2">Competência <span class="sort-icon"></span></div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-4" data-sort-key="vencimento">
+                                        <div class="flex items-center gap-2">Vencimento <span class="sort-icon"></span></div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-4" data-sort-key="situacao">
+                                        <div class="flex items-center gap-2">Situação <span class="sort-icon"></span></div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-4 text-right" data-sort-key="valor">
+                                        <div class="flex items-center justify-end gap-2">Valor Total <span class="sort-icon"></span></div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="debt-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 
     <script>
         const allData = [
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 6047.60, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 23023.34, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 6198.48, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 23672.78, situacao: 'Vencido', tipo: 'IRPJ' },
             { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '1º trimestre', vencimento: '30/05/2025', valor: 3277.25, situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 3133.02, situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 9085.40, situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'Contribuições da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 7984.91, situacao: 'Vencido', tipo: 'Contribuições' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 3211.19, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 9341.68, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 8202.65, situacao: 'Vencido', tipo: 'Contribuições' },
             { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 22085.27, situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'Contribuições da folha', competencia: '07/2025', vencimento: '20/08/2025', valor: 8010.10, situacao: 'A vencer', tipo: 'Contribuições' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'PIS', competencia: '07/2025', vencimento: '29/08/2025', valor: 2381.80, situacao: 'A vencer', tipo: 'PIS/COFINS' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'COFINS', competencia: '07/2025', vencimento: '29/08/2025', valor: 10992.94, situacao: 'A vencer', tipo: 'PIS/COFINS' },
             { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 8715.21, situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 2048.22, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 1773.86, situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'Contribuições da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 3131.53, situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 9594.43, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 4212.09, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 2099.32, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 1818.12, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 3216.90, situacao: 'Vencido', tipo: 'Contribuições' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 9865.06, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 4330.90, situacao: 'Vencido', tipo: 'CSLL' },
             { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 9203.49, situacao: 'A vencer', tipo: 'IRPJ' },
             { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 4040.45, situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'Contribuições da folha', competencia: '07/2025', vencimento: '20/08/2025', valor: 2359.04, situacao: 'A vencer', tipo: 'Contribuições' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'PIS FATURAMENTO', competencia: '03/2025', vencimento: '25/04/2025', valor: 132.76, situacao: 'Vencido', tipo: 'PIS/COFINS' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'COFINS', competencia: '07/2025', vencimento: '29/08/2025', valor: 6379.92, situacao: 'A vencer', tipo: 'PIS/COFINS' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'PIS', competencia: '07/2025', vencimento: '29/08/2025', valor: 1382.32, situacao: 'A vencer', tipo: 'PIS/COFINS' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'PIS', competencia: '03/2025', vencimento: '25/04/2025', valor: 132.76, situacao: 'Vencido', tipo: 'PIS/COFINS' },
             { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'COFINS', competencia: '03/2025', vencimento: '25/04/2025', valor: 612.78, situacao: 'Vencido', tipo: 'PIS/COFINS' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'Contribuições da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 4414.86, situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 32682.80, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 12705.52, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 4535.26, situacao: 'Vencido', tipo: 'Contribuições' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 33604.71, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 13063.91, situacao: 'Vencido', tipo: 'CSLL' },
             { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 31351.16, situacao: 'A vencer', tipo: 'IRPJ' },
             { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 12187.84, situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'Contribuições da folha', competencia: '07/2025', vencimento: '20/08/2025', valor: 6071.74, situacao: 'A vencer', tipo: 'Contribuições' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'PIS', competencia: '07/2025', vencimento: '20/08/2025', valor: 245.57, situacao: 'A vencer', tipo: 'PIS/COFINS' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'COFINS', competencia: '07/2025', vencimento: '20/08/2025', valor: 1133.38, situacao: 'A vencer', tipo: 'PIS/COFINS' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'COFINS', competencia: 'mar/25', vencimento: '25/04/2025', valor: 27170.99, situacao: 'Vencido', tipo: 'PIS/COFINS' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 29073.59, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Contribuições da folha', competencia: 'jun/25', vencimento: '18/07/2025', valor: 14197.50, situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 20463.83, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 9351.59, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 29798.97, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 14584.65, situacao: 'Vencido', tipo: 'Contribuições' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 21041.07, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 9615.38, situacao: 'Vencido', tipo: 'CSLL' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 19630.02, situacao: 'A vencer', tipo: 'IRPJ' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 8970.55, situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Contribuições da folha', competencia: '07/2025', vencimento: '20/08/2025', valor: 12550.07, situacao: 'A vencer', tipo: 'Contribuições' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'COFINS', competencia: '07/2025', vencimento: '25/08/2025', valor: 8446.95, situacao: 'A vencer', tipo: 'PIS/COFINS' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'PIS', competencia: '07/2025', vencimento: '25/08/2025', valor: 1830.17, situacao: 'A vencer', tipo: 'PIS/COFINS' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Parcelamento 11/34', competencia: '06/2025', vencimento: '30/06/2025', valor: 576.43, situacao: 'Vencido', tipo: 'Parcelamento' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Parcelamento 12/34', competencia: '07/2025', vencimento: '31/07/2025', valor: 576.43, situacao: 'Vencido', tipo: 'Parcelamento' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Parcelamento 13/34', competencia: '08/2025', vencimento: '29/08/2025', valor: 576.43, situacao: 'A vencer', tipo: 'Parcelamento' }
         ];
 
         let debtByTypeChart, debtStatusChart;
+        let activeCompany = 'Todas';
+        // State for sorting
+        let sortState = { key: 'vencimento', direction: 'asc' };
 
         const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-
-        const tooltipTitleCallback = (tooltipItems) => {
-            const item = tooltipItems[0];
-            let label = item.chart.data.labels[item.dataIndex];
-            return Array.isArray(label) ? label.join(' ') : label;
+        
+        // Helper to parse dd/mm/yyyy dates for correct sorting
+        const parseDateForSort = (dateStr) => {
+            const [day, month, year] = dateStr.split('/');
+            return new Date(year, month - 1, day);
         };
 
         const setupCharts = () => {
+            Chart.defaults.font.family = 'Inter';
+            Chart.defaults.color = '#64748b';
+
             const ctxDebtByType = document.getElementById('debtByTypeChart').getContext('2d');
             debtByTypeChart = new Chart(ctxDebtByType, {
                 type: 'doughnut',
                 data: { labels: [], datasets: [] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right' },
-                        tooltip: { callbacks: { 
-                            title: tooltipTitleCallback,
-                            label: (context) => `${context.label}: ${formatCurrency(context.raw)}`
-                        }}
-                    }
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8,
+                                padding: 20
+                            }
+                        } 
+                    },
+                    cutout: '70%'
                 }
             });
 
@@ -215,74 +283,78 @@
                 type: 'bar',
                 data: { labels: [], datasets: [] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: { display: false },
-                         tooltip: { callbacks: { 
-                            title: tooltipTitleCallback,
-                            label: (context) => formatCurrency(context.raw)
-                        }}
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
                     scales: {
-                        x: { ticks: { callback: (value) => 'R$ ' + (value / 1000) + 'k' } }
+                        x: { 
+                            grid: { display: false },
+                            ticks: {
+                                callback: (value, index, values) => {
+                                    return 'R$ ' + (values[index].value / 1000) + 'k';
+                                }
+                            }
+                        },
+                        y: { 
+                            grid: { color: '#e2e8f0', borderDash: [5, 5] },
+                            border: { display: false }
+                        }
                     }
                 }
             });
         };
 
         const updateDashboard = () => {
-            const selectedCompany = document.querySelector('.filter-btn.active').dataset.company;
-            
-            const filters = {
-                nomeDebito: document.getElementById('filter-nomeDebito').value,
-                competencia: document.getElementById('filter-competencia').value,
-                vencimento: document.getElementById('filter-vencimento').value,
-                situacao: document.getElementById('filter-situacao').value,
-            };
+            const situacaoFilter = document.getElementById('filter-situacao').value;
 
-            let filteredData = allData;
+            const dataForKpi = (activeCompany === 'Todas')
+                ? allData
+                : allData.filter(d => d.empresa.startsWith(activeCompany));
 
-            if (selectedCompany !== 'Todas') {
-                filteredData = filteredData.filter(d => d.empresa === selectedCompany);
+            let filteredData = dataForKpi;
+            if (situacaoFilter !== 'Todos') {
+                filteredData = filteredData.filter(d => d.situacao === situacaoFilter);
             }
 
-            Object.keys(filters).forEach(key => {
-                if (filters[key] !== 'Todos') {
-                    filteredData = filteredData.filter(d => d[key] === filters[key]);
+            // Sort data before rendering the table
+            const sortedData = [...filteredData].sort((a, b) => {
+                const key = sortState.key;
+                const dir = sortState.direction === 'asc' ? 1 : -1;
+
+                let valA = a[key];
+                let valB = b[key];
+
+                if (key === 'vencimento') {
+                    valA = parseDateForSort(valA);
+                    valB = parseDateForSort(valB);
                 }
+                
+                if (valA < valB) return -1 * dir;
+                if (valA > valB) return 1 * dir;
+                return 0;
             });
 
             let total = 0, vencido = 0, aVencer = 0;
-            const byType = {};
-
-            const dataForKpi = (selectedCompany === 'Todas') ? allData : allData.filter(d => d.empresa === selectedCompany);
-            
             dataForKpi.forEach(d => {
                 total += d.valor;
                 if (d.situacao === 'Vencido') vencido += d.valor;
                 else aVencer += d.valor;
             });
-            
-            filteredData.forEach(d => {
-                if (!byType[d.tipo]) byType[d.tipo] = 0;
-                byType[d.tipo] += d.valor;
-            });
-
 
             document.getElementById('kpi-total').textContent = formatCurrency(total);
             document.getElementById('kpi-vencido').textContent = formatCurrency(vencido);
             document.getElementById('kpi-avencer').textContent = formatCurrency(aVencer);
 
-            const typeLabels = Object.keys(byType);
-            const typeData = Object.values(byType);
-            debtByTypeChart.data.labels = typeLabels;
+            const byType = {};
+            filteredData.forEach(d => {
+                if (!byType[d.tipo]) byType[d.tipo] = 0;
+                byType[d.tipo] += d.valor;
+            });
+            debtByTypeChart.data.labels = Object.keys(byType);
             debtByTypeChart.data.datasets = [{
-                data: typeData,
-                backgroundColor: ['#0d3b66', '#2a6f97', '#61a5c2', '#a9d6e5', '#dee2e6'],
-                borderColor: '#ffffff',
-                borderWidth: 4
+                data: Object.values(byType),
+                backgroundColor: ['#1e3a8a', '#2563eb', '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe'],
+                borderColor: '#ffffff', borderWidth: 4,
+                borderRadius: 5
             }];
             debtByTypeChart.update();
 
@@ -290,100 +362,111 @@
                 if (d.situacao === 'Vencido') acc.vencido += d.valor;
                 else acc.aVencer += d.valor;
                 return acc;
-            }, {vencido: 0, aVencer: 0});
-
-
+            }, { vencido: 0, aVencer: 0 });
             debtStatusChart.data.labels = ['Vencido', 'A Vencer'];
             debtStatusChart.data.datasets = [{
-                label: 'Status da Dívida',
                 data: [statusData.vencido, statusData.aVencer],
-                backgroundColor: ['#e5383b', '#43aa8b'],
-                borderRadius: 4
+                backgroundColor: [ '#dc2626', '#16a34a'],
+                borderWidth: 0,
+                borderRadius: 6,
+                barPercentage: 0.6
             }];
             debtStatusChart.update();
 
             const tableBody = document.getElementById('debt-table-body');
             tableBody.innerHTML = '';
-            filteredData.forEach((d, index) => {
+            sortedData.forEach((d) => {
                 const row = document.createElement('tr');
-                row.className = index % 2 === 0 ? 'bg-white border-b' : 'bg-gray-50 border-b';
+                row.className = 'border-b border-gray-200 hover:bg-gray-50';
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-medium">${d.nomeDebito}</td>
-                    <td class="px-6 py-4">${d.competencia}</td>
-                    <td class="px-6 py-4">${d.vencimento}</td>
+                    <td class="px-6 py-4 font-semibold text-gray-900">${d.nomeDebito}</td>
+                    <td class="px-6 py-4 text-gray-600">${d.competencia}</td>
+                    <td class="px-6 py-4 text-gray-600">${d.vencimento}</td>
                     <td class="px-6 py-4">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${d.situacao === 'Vencido' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
+                        <span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${d.situacao === 'Vencido' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">
                             ${d.situacao}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-right font-semibold">${formatCurrency(d.valor)}</td>
+                    <td class="px-6 py-4 text-right font-bold text-gray-900">${formatCurrency(d.valor)}</td>
                 `;
                 tableBody.appendChild(row);
             });
+            updateSortIcons();
         };
 
-        const setupCompanyFilters = () => {
-            const companies = ['Todas', ...new Set(allData.map(d => d.empresa))];
-            const filtersContainer = document.getElementById('filters');
+        const updateSortIcons = () => {
+            document.querySelectorAll('.table-header th').forEach(th => {
+                const iconSpan = th.querySelector('.sort-icon');
+                if (iconSpan) {
+                    if (th.dataset.sortKey === sortState.key) {
+                        iconSpan.innerHTML = sortState.direction === 'asc' ? '⬆️' : '⬇️';
+                        iconSpan.classList.add('active');
+                    } else {
+                        iconSpan.innerHTML = '';
+                        iconSpan.classList.remove('active');
+                    }
+                }
+            });
+        };
+
+        const setupFiltersAndSorting = () => {
+            // Company Filters
+            const companyNames = [...new Set(allData.map(d => d.empresa.replace(/ - \(\w+\)/, '')))];
+            const companies = ['Todas', ...companyNames];
+            const filtersContainer = document.getElementById('company-filters');
+            
             companies.forEach(company => {
-                const button = document.createElement('button');
-                button.className = 'filter-btn';
-                button.textContent = company;
-                button.dataset.company = company;
-                button.addEventListener('click', () => {
-                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
+                const link = document.createElement('a');
+                link.href = '#';
+                link.className = 'sidebar-link flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium';
+                link.dataset.company = company;
+                link.innerHTML = `<i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i><span>${company === 'Todas' ? 'Todas Empresas' : company}</span>`;
+                
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                    activeCompany = company;
                     updateDashboard();
                 });
-                filtersContainer.appendChild(button);
+                filtersContainer.appendChild(link);
             });
-            filtersContainer.querySelector('.filter-btn').classList.add('active');
-        };
+            filtersContainer.querySelector('.sidebar-link').classList.add('active');
 
-        const setupColumnFilters = () => {
-            const filterContainer = document.getElementById('column-filters');
-            const filterColumns = {
-                nomeDebito: 'Nome do Débito',
-                competencia: 'Competência',
-                vencimento: 'Vencimento',
-                situacao: 'Situação'
-            };
+            // Situation Filter
+            const situacaoSelect = document.getElementById('filter-situacao');
+            const situacaoValues = ['Todos', ...new Set(allData.map(item => item.situacao))];
+            situacaoValues.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                situacaoSelect.appendChild(option);
+            });
+            situacaoSelect.addEventListener('change', updateDashboard);
 
-            Object.keys(filterColumns).forEach(key => {
-                const uniqueValues = ['Todos', ...new Set(allData.map(item => item[key]))];
-                
-                const label = document.createElement('label');
-                label.htmlFor = `filter-${key}`;
-                label.className = "font-semibold text-gray-600";
-                label.textContent = `${filterColumns[key]}:`;
+            // Sorting Event Listeners
+            document.querySelectorAll('.table-header th').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.dataset.sortKey;
+                    if (!key) return;
 
-                const select = document.createElement('select');
-                select.id = `filter-${key}`;
-                select.className = "filter-select";
-                
-                uniqueValues.forEach(value => {
-                    const option = document.createElement('option');
-                    option.value = value;
-                    option.textContent = value;
-                    select.appendChild(option);
+                    if (sortState.key === key) {
+                        sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortState.key = key;
+                        sortState.direction = 'asc';
+                    }
+                    updateDashboard();
                 });
-
-                select.addEventListener('change', updateDashboard);
-                
-                const wrapper = document.createElement('div');
-                wrapper.appendChild(label);
-                wrapper.appendChild(select);
-                filterContainer.appendChild(wrapper);
             });
         };
 
         window.onload = () => {
+            lucide.createIcons();
             setupCharts();
-            setupCompanyFilters();
-            setupColumnFilters();
+            setupFiltersAndSorting();
             updateDashboard();
         };
-
     </script>
 </body>
 </html>
