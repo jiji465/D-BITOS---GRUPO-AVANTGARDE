@@ -101,7 +101,6 @@
 </head>
 <body class="flex min-h-screen">
 
-    <!-- Sidebar -->
     <aside id="sidebar" class="sidebar w-72 text-white flex-shrink-0 p-4 flex flex-col">
         <div class="flex items-center gap-3 mb-10 px-2">
             <div class="bg-blue-100 p-2 rounded-lg">
@@ -114,7 +113,6 @@
         </nav>
     </aside>
 
-    <!-- Main Content -->
     <div class="flex-1 flex flex-col">
         <header class="bg-white/80 backdrop-blur-lg border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-10">
              <h1 class="text-2xl font-bold text-gray-800">Visão Geral Financeira</h1>
@@ -127,7 +125,6 @@
         </header>
 
         <main class="flex-1 p-8">
-            <!-- KPIs -->
             <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <div class="kpi-card p-6">
                     <div class="flex items-center justify-between mb-4">
@@ -152,7 +149,6 @@
                 </div>
             </section>
 
-            <!-- Charts -->
             <section class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
                 <div class="chart-card lg:col-span-2 h-[450px]">
                     <h3 class="text-lg font-bold text-gray-800 mb-4">Composição da Dívida por Tipo</h3>
@@ -164,7 +160,6 @@
                 </div>
             </section>
 
-            <!-- Table -->
             <section>
                 <h3 class="text-2xl font-bold text-gray-800 mb-4">Detalhamento dos Débitos</h3>
                 <div class="table-container bg-white">
@@ -199,46 +194,50 @@
 
     <script>
         const allData = [
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 6198.48, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 23672.78, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 6265.54, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 23961.42, situacao: 'Vencido', tipo: 'IRPJ' },
             { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '1º trimestre', vencimento: '30/05/2025', valor: 3277.25, situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 3211.19, situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 9341.68, situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 8202.65, situacao: 'Vencido', tipo: 'Contribuições' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 3245.93, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 9455.58, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 8299.40, situacao: 'Vencido', tipo: 'Contribuições' },
             { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 22085.27, situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'PIS', competencia: '07/2025', vencimento: '29/08/2025', valor: 2381.80, situacao: 'A vencer', tipo: 'PIS/COFINS' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'COFINS', competencia: '07/2025', vencimento: '29/08/2025', valor: 10992.94, situacao: 'A vencer', tipo: 'PIS/COFINS' },
             { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 8715.21, situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 2099.32, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 1818.12, situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 3216.90, situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 9865.06, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 4330.90, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 22085.27, situacao: 'A vencer', tipo: 'IRPJ' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 8715.21, situacao: 'A vencer', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA', nomeDebito: 'ISS (DIVIDA ATIVA)', competencia: '03/2022', vencimento: '18/04/2022', valor: 4023.42, situacao: 'Vencido', tipo: 'PIS/COFINS' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 2122.03, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 1837.79, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 3254.87, situacao: 'Vencido', tipo: 'Contribuições' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 9985.35, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 4383.71, situacao: 'Vencido', tipo: 'CSLL' },
             { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 9203.49, situacao: 'A vencer', tipo: 'IRPJ' },
             { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 4040.45, situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'COFINS', competencia: '07/2025', vencimento: '29/08/2025', valor: 6379.92, situacao: 'A vencer', tipo: 'PIS/COFINS' },
-            { empresa: 'AVANT SPA LTDA', nomeDebito: 'PIS', competencia: '07/2025', vencimento: '29/08/2025', valor: 1382.32, situacao: 'A vencer', tipo: 'PIS/COFINS' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 9203.49, situacao: 'A vencer', tipo: 'IRPJ' },
+            { empresa: 'AVANT SPA LTDA', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 4040.45, situacao: 'A vencer', tipo: 'CSLL' },
             { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'PIS', competencia: '03/2025', vencimento: '25/04/2025', valor: 132.76, situacao: 'Vencido', tipo: 'PIS/COFINS' },
             { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'COFINS', competencia: '03/2025', vencimento: '25/04/2025', valor: 612.78, situacao: 'Vencido', tipo: 'PIS/COFINS' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 4535.26, situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 33604.71, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 13063.91, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 4588.75, situacao: 'Vencido', tipo: 'Contribuições' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 34014.45, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 13223.20, situacao: 'Vencido', tipo: 'CSLL' },
             { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 31351.16, situacao: 'A vencer', tipo: 'IRPJ' },
             { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 12187.84, situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'PIS', competencia: '07/2025', vencimento: '25/08/2025', valor: 245.57, situacao: 'A vencer', tipo: 'PIS/COFINS' },
-            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'COFINS', competencia: '07/2025', vencimento: '25/08/2025', valor: 1133.38, situacao: 'A vencer', tipo: 'PIS/COFINS' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'COFINS', competencia: 'mar/25', vencimento: '25/04/2025', valor: 27170.99, situacao: 'Vencido', tipo: 'PIS/COFINS' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 29798.97, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 14584.65, situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 21041.07, situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 9615.38, situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 31351.16, situacao: 'A vencer', tipo: 'IRPJ' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 12187.84, situacao: 'A vencer', tipo: 'CSLL' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'ISS', competencia: '05/2025', vencimento: '10/06/2025', valor: 52267.14, situacao: 'Vencido', tipo: 'PIS/COFINS' },
+            { empresa: 'AVANTGARDE CURSOS LTDA', nomeDebito: 'ISS', competencia: '06/2025', vencimento: '10/07/2025', valor: 195.67, situacao: 'Vencido', tipo: 'PIS/COFINS' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'COFINS', competencia: '03/2025', vencimento: '25/04/2025', valor: 27170.99, situacao: 'Vencido', tipo: 'PIS/COFINS' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 30121.35, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Contribuições previdênciaris e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 14756.70, situacao: 'Vencido', tipo: 'Contribuições' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 21297.62, situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 9732.62, situacao: 'Vencido', tipo: 'CSLL' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 19630.02, situacao: 'A vencer', tipo: 'IRPJ' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 8970.55, situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'COFINS', competencia: '07/2025', vencimento: '25/08/2025', valor: 8446.95, situacao: 'A vencer', tipo: 'PIS/COFINS' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'PIS', competencia: '07/2025', vencimento: '25/08/2025', valor: 1830.17, situacao: 'A vencer', tipo: 'PIS/COFINS' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 19630.02, situacao: 'A vencer', tipo: 'IRPJ' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 8970.55, situacao: 'A vencer', tipo: 'CSLL' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Parcelamento 11/34', competencia: '06/2025', vencimento: '30/06/2025', valor: 576.43, situacao: 'Vencido', tipo: 'Parcelamento' },
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Parcelamento 12/34', competencia: '07/2025', vencimento: '31/07/2025', valor: 576.43, situacao: 'Vencido', tipo: 'Parcelamento' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Parcelamento 13/34', competencia: '08/2025', vencimento: '29/08/2025', valor: 576.43, situacao: 'A vencer', tipo: 'Parcelamento' }
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'Parcelamento 13/34', competencia: '08/2025', vencimento: '29/08/2025', valor: 576.43, situacao: 'A vencer', tipo: 'Parcelamento' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA', nomeDebito: 'ISS', competencia: '04/2024', vencimento: '10/05/2024', valor: 1053.49, situacao: 'Vencido', tipo: 'PIS/COFINS' }
         ];
 
         let debtByTypeChart, debtStatusChart;
@@ -470,4 +469,3 @@
     </script>
 </body>
 </html>
-
