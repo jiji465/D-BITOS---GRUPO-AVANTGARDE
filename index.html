@@ -45,6 +45,12 @@
         .kpi-card:hover, .chart-card:hover { box-shadow: 0 16px 36px -12px rgba(0,0,0,0.15); }
         .filter-bar .filter-input { background-color: #f8fafc; }
         .filter-bar button { border: 1px solid var(--border-color); }
+        .filter-grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 0.75rem; align-items: end; }
+        .filter-field { grid-column: span 4 / span 4; min-width: 200px; }
+        .filter-field.wide { grid-column: span 6 / span 6; }
+        .filter-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: .04em; }
+        .filter-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.25rem; height: 1.25rem; padding: 0 0.35rem; border-radius: 9999px; background: #e5edff; color: #1e40af; font-size: 0.7rem; font-weight: 700; }
+        .filter-actions { grid-column: span 2 / span 2; display: flex; gap: 0.5rem; justify-content: flex-end; }
     </style>
 </head>
 <body class="flex min-h-screen">
@@ -98,13 +104,24 @@
                     <div class="chart-card lg:col-span-3 flex flex-col"><h3 class="text-lg font-bold text-gray-800 mb-4">Receitas vs. Despesas por Mês</h3><div class="relative h-96"><canvas id="revenueVsExpensesChart"></canvas></div></div>
                 </section>
                 <section>
-                    <div class="filter-bar flex items-center justify-between gap-4 flex-wrap">
-                        <h3 class="text-xl font-bold text-gray-800">Lançamentos</h3>
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <div class="filter-input-group"><i data-lucide="calendar-days" class="w-4 h-4"></i><select id="filter-mes-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select></div>
-                            <div class="filter-input-group"><i data-lucide="filter" class="w-4 h-4"></i><select id="filter-categoria-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select></div>
-                            <div class="filter-input-group"><i data-lucide="layers" class="w-4 h-4"></i><select id="filter-tipo-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select></div>
-                            <button id="clear-filters-conciliacao-btn" class="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" title="Limpar Filtros"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
+                    <div class="filter-bar">
+                        <div class="flex items-center justify-between mb-3"><h3 class="text-xl font-bold text-gray-800">Lançamentos</h3></div>
+                        <div class="filter-grid">
+                            <div class="filter-field">
+                                <label class="filter-label"><i data-lucide="calendar-days" class="w-4 h-4"></i> Mês <span id="badge-mes" class="filter-badge">0</span></label>
+                                <select id="filter-mes-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select>
+                            </div>
+                            <div class="filter-field wide">
+                                <label class="filter-label"><i data-lucide="filter" class="w-4 h-4"></i> Categoria <span id="badge-categoria" class="filter-badge">0</span></label>
+                                <select id="filter-categoria-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select>
+                            </div>
+                            <div class="filter-field">
+                                <label class="filter-label"><i data-lucide="layers" class="w-4 h-4"></i> Tipo <span id="badge-tipo" class="filter-badge">0</span></label>
+                                <select id="filter-tipo-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select>
+                            </div>
+                            <div class="filter-actions">
+                                <button id="clear-filters-conciliacao-btn" class="px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition">Limpar</button>
+                            </div>
                         </div>
                     </div>
                     <div class="table-container bg-white"><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="table-header"><tr class="bg-gray-50"><th class="px-6 py-4" data-sort-key-conc="mes"><div class="flex items-center gap-2">Mês <span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key-conc="categoria"><div class="flex items-center gap-2">Categoria <span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key-conc="tipo"><div class="flex items-center gap-2">Tipo <span class="sort-icon"></span></div></th><th class="px-6 py-4 text-right" data-sort-key-conc="valor"><div class="flex items-center justify-end gap-2">Valor <span class="sort-icon"></span></div></th></tr></thead><tbody id="conciliacao-table-body"></tbody></table></div></div>
@@ -123,15 +140,28 @@
                     <div class="chart-card lg:col-span-3 flex flex-col"><h3 class="text-lg font-bold text-gray-800 mb-4">Dívida por Empresa</h3><div class="relative h-96"><canvas id="debtByCompanyChart"></canvas></div></div>
                 </section>
                 <section>
-                    <div class="filter-bar flex items-center justify-between gap-4 flex-wrap">
-                        <h3 class="text-xl font-bold text-gray-800">Detalhamento dos Débitos</h3>
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <div class="filter-input-group"><i data-lucide="calendar" class="w-4 h-4"></i><input type="date" id="start-date-filter" class="filter-input p-2"></div>
-                            <span class="text-gray-500">até</span>
-                            <div class="filter-input-group"><i data-lucide="calendar" class="w-4 h-4"></i><input type="date" id="end-date-filter" class="filter-input p-2"></div>
-                            <div class="filter-input-group"><i data-lucide="filter" class="w-4 h-4"></i><select id="filter-situacao" multiple class="filter-input p-2"></select></div>
-                            <div class="filter-input-group"><i data-lucide="list-tree" class="w-4 h-4"></i><select id="filter-tipo-debito" multiple class="filter-input p-2"></select></div>
-                            <button id="clear-filters-btn" class="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition" title="Limpar Filtros"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
+                    <div class="filter-bar">
+                        <div class="flex items-center justify-between mb-3"><h3 class="text-xl font-bold text-gray-800">Detalhamento dos Débitos</h3></div>
+                        <div class="filter-grid">
+                            <div class="filter-field">
+                                <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Início</label>
+                                <input type="date" id="start-date-filter" class="filter-input p-2 w-full">
+                            </div>
+                            <div class="filter-field">
+                                <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Fim</label>
+                                <input type="date" id="end-date-filter" class="filter-input p-2 w-full">
+                            </div>
+                            <div class="filter-field">
+                                <label class="filter-label"><i data-lucide="filter" class="w-4 h-4"></i> Situação <span id="badge-situacao" class="filter-badge">0</span></label>
+                                <select id="filter-situacao" multiple class="filter-input p-2 w-full"></select>
+                            </div>
+                            <div class="filter-field">
+                                <label class="filter-label"><i data-lucide="list-tree" class="w-4 h-4"></i> Tipo <span id="badge-tipo-debito" class="filter-badge">0</span></label>
+                                <select id="filter-tipo-debito" multiple class="filter-input p-2 w-full"></select>
+                            </div>
+                            <div class="filter-actions">
+                                <button id="clear-filters-btn" class="px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition">Limpar</button>
+                            </div>
                         </div>
                     </div>
                     <div class="table-container bg-white"><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="table-header"><tr class="bg-gray-50"><th class="px-6 py-4" data-sort-key="nomeDebito"><div class="flex items-center gap-2">Débito<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="competencia"><div class="flex items-center gap-2">Competência<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="vencimento"><div class="flex items-center gap-2">Vencimento<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="situacao"><div class="flex items-center gap-2">Situação<span class="sort-icon"></span></div></th><th class="px-6 py-4 text-right" data-sort-key="valor"><div class="flex items-center justify-end gap-2">Valor<span class="sort-icon"></span></div></th></tr></thead><tbody id="debt-table-body"></tbody></table></div></div>
@@ -203,15 +233,20 @@
         const parseCurrency = (str) => typeof str === 'string' ? parseFloat(str.replace(/[^0-9,-]+/g,"").replace(/\./g,'').replace(',', '.')) : str;
         const parseDebitosDate = (d) => { const [day, month, year] = d.split('/'); return new Date(year, month - 1, day); };
         const getMultiValues = (selectId) => { const el = document.getElementById(selectId); return Array.from(el.selectedOptions).map(o => o.value); };
+        const updateFilterBadges = () => {
+            const safeLen = (id) => { const el = document.getElementById(id); return el ? Array.from(el.selectedOptions).length : 0; };
+            const setBadge = (badgeId, value) => { const b = document.getElementById(badgeId); if (b) b.textContent = value; };
+            setBadge('badge-mes', safeLen('filter-mes-conciliacao'));
+            setBadge('badge-categoria', safeLen('filter-categoria-conciliacao'));
+            setBadge('badge-tipo', safeLen('filter-tipo-conciliacao'));
+            setBadge('badge-situacao', safeLen('filter-situacao'));
+            setBadge('badge-tipo-debito', safeLen('filter-tipo-debito'));
+        };
 
         const debitosData = debitosDataRaw.map(d => ({...d, valor: parseCurrency(d.valor), empresa: d.empresa.replace(/ - \(\w+\)/, '').trim() }));
         const conciliacaoData = conciliacaoDataRaw.map(d => {
             const valor = parseCurrency(d.valor);
-            let tipo = 'Não Operacional';
-            if (d.categoria.startsWith('DEDUÇÃO') || d.categoria.includes('IMPOSTO SOBRE VENDAS')) tipo = 'Dedução';
-            else if (d.categoria.includes('RECEITA')) tipo = 'Receita';
-            else if (d.categoria.startsWith('CUSTO')) tipo = 'Custo';
-            else if (d.categoria.startsWith('DESPESA') || d.categoria === 'EMPRÉSTIMO') tipo = 'Despesa';
+            const tipo = d.categoria.includes('RECEITA') ? 'Receita' : 'Despesa';
             const empresa = d.empresa === 'AGUIAR' ? 'AGUIAR DUARTE SERVICOS MEDICOS LTDA' : (d.empresa === 'CURSOS' ? 'AVANTGARDE CURSOS LTDA' : (d.empresa === 'SPA' ? 'AVANT SPA LTDA' : d.empresa));
             return {...d, valor, tipo, empresa};
         });
@@ -224,16 +259,16 @@
             updateGeral(debitos, dre);
             updateDRE(dre);
             updateDebitos(debitos);
+            updateFilterBadges();
         };
         const updateGeral = (debitos, dre) => {
             const totalReceitas = dre.filter(d => d.tipo === 'Receita').reduce((sum, item) => sum + item.valor, 0);
-            const totalDeducoes = dre.filter(d => d.tipo === 'Dedução').reduce((sum, item) => sum + item.valor, 0);
-            const totalDespesasCustos = dre.filter(d => d.tipo === 'Despesa' || d.tipo === 'Custo').reduce((sum, item) => sum + item.valor, 0);
-            const resultadoLiquido = totalReceitas - totalDeducoes - totalDespesasCustos;
+            const totalDespesasCustos = dre.filter(d => d.tipo === 'Despesa').reduce((sum, item) => sum + item.valor, 0);
+            const resultadoLiquido = totalReceitas - totalDespesasCustos;
             const dividaTotal = debitos.reduce((sum, item) => sum + item.valor, 0);
             const dividaVencida = debitos.filter(d => d.situacao === 'Vencido').reduce((sum, item) => sum + item.valor, 0);
             document.getElementById('geral-kpi-receita').textContent = formatCurrency(totalReceitas);
-            document.getElementById('geral-kpi-despesa').textContent = formatCurrency(totalDeducoes + totalDespesasCustos);
+            document.getElementById('geral-kpi-despesa').textContent = formatCurrency(totalDespesasCustos);
             document.getElementById('geral-kpi-resultado').textContent = formatCurrency(resultadoLiquido);
             document.getElementById('geral-kpi-divida').textContent = formatCurrency(dividaTotal);
             document.getElementById('geral-kpi-vencida').textContent = formatCurrency(dividaVencida);
@@ -241,7 +276,7 @@
             const resultadoPorEmpresa = dre.reduce((acc, { empresa, tipo, valor }) => {
                 if (!acc[empresa]) acc[empresa] = 0;
                 if (tipo === 'Receita') acc[empresa] += valor;
-                if (tipo === 'Despesa' || tipo === 'Custo') acc[empresa] -= valor;
+                if (tipo === 'Despesa') acc[empresa] -= valor;
                 return acc;
             }, {});
             charts.geralResultado.data.labels = Object.keys(resultadoPorEmpresa);
@@ -265,13 +300,12 @@
             const filtered = data.filter(d => (meses.length === 0 || meses.includes(d.mes)) && (categorias.length === 0 || categorias.includes(d.categoria)) && (tipos.length === 0 || tipos.includes(d.tipo)));
             
             const totalReceitas = filtered.filter(d => d.tipo === 'Receita').reduce((sum, i) => sum + i.valor, 0);
-            const totalDeducoes = filtered.filter(d => d.tipo === 'Dedução').reduce((sum, i) => sum + i.valor, 0);
-            const totalDespesas = filtered.filter(d => d.tipo === 'Despesa' || d.tipo === 'Custo').reduce((sum, i) => sum + i.valor, 0);
+            const totalDespesas = filtered.filter(d => d.tipo === 'Despesa').reduce((sum, i) => sum + i.valor, 0);
             document.getElementById('kpi-receitas').textContent = formatCurrency(totalReceitas);
-            document.getElementById('kpi-despesas').textContent = formatCurrency(totalDeducoes + totalDespesas);
-            document.getElementById('kpi-resultado').textContent = formatCurrency(totalReceitas - totalDeducoes - totalDespesas);
+            document.getElementById('kpi-despesas').textContent = formatCurrency(totalDespesas);
+            document.getElementById('kpi-resultado').textContent = formatCurrency(totalReceitas - totalDespesas);
 
-            const expensesByType = filtered.filter(d => d.tipo === 'Despesa' || d.tipo === 'Custo').reduce((acc, d) => { acc[d.categoria] = (acc[d.categoria] || 0) + d.valor; return acc; }, {});
+            const expensesByType = filtered.filter(d => d.tipo === 'Despesa').reduce((acc, d) => { acc[d.categoria] = (acc[d.categoria] || 0) + d.valor; return acc; }, {});
             charts.expensesByType.data.labels = Object.keys(expensesByType);
             charts.expensesByType.data.datasets[0].data = Object.values(expensesByType);
             charts.expensesByType.update();
@@ -279,7 +313,7 @@
             const monthlySummary = filtered.reduce((acc, d) => {
                 if (!acc[d.mes]) acc[d.mes] = { receitas: 0, despesas: 0 };
                 if (d.tipo === 'Receita') acc[d.mes].receitas += d.valor;
-                if (d.tipo === 'Despesa' || d.tipo === 'Custo' || d.tipo === 'Dedução') acc[d.mes].despesas += d.valor;
+                if (d.tipo === 'Despesa') acc[d.mes].despesas += d.valor;
                 return acc;
             }, {});
             const monthOrder = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -290,7 +324,7 @@
             charts.revenueVsExpenses.update();
 
             const tableBody = document.getElementById('conciliacao-table-body');
-            tableBody.innerHTML = filtered.sort((a,b) => (a[state.dreSort.key] > b[state.dreSort.key] ? 1 : -1) * (state.dreSort.dir === 'asc' ? 1 : -1)).map(d => `<tr class="table-row border-b"><td class="px-6 py-4">${d.mes}</td><td class="px-6 py-4 font-semibold">${d.categoria}</td><td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${d.tipo === 'Receita' ? 'bg-green-100 text-green-700' : (d.tipo === 'Despesa' ? 'bg-red-100 text-red-700' : (d.tipo === 'Custo' ? 'bg-yellow-100 text-yellow-700' : (d.tipo === 'Dedução' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700')))}">${d.tipo}</span></td><td class="px-6 py-4 text-right font-bold ${d.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}">${d.tipo === 'Receita' ? '+' : '-'} ${formatCurrency(d.valor)}</td></tr>`).join('');
+            tableBody.innerHTML = filtered.sort((a,b) => (a[state.dreSort.key] > b[state.dreSort.key] ? 1 : -1) * (state.dreSort.dir === 'asc' ? 1 : -1)).map(d => `<tr class="table-row border-b"><td class="px-6 py-4">${d.mes}</td><td class="px-6 py-4 font-semibold">${d.categoria}</td><td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${d.tipo === 'Receita' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${d.tipo}</span></td><td class="px-6 py-4 text-right font-bold ${d.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}">${d.tipo === 'Receita' ? '+' : '-'} ${formatCurrency(d.valor)}</td></tr>`).join('');
         };
         const updateDebitos = (data) => {
             const situacoes = getMultiValues('filter-situacao');
@@ -345,9 +379,9 @@
                 updateSidebar();
                 updateAll();
             }));
-            document.querySelectorAll('#filter-mes-conciliacao, #filter-categoria-conciliacao, #filter-tipo-conciliacao').forEach(el => el.addEventListener('change', updateAll));
+            document.querySelectorAll('#filter-mes-conciliacao, #filter-categoria-conciliacao, #filter-tipo-conciliacao').forEach(el => el.addEventListener('change', () => { updateAll(); }));
             document.getElementById('clear-filters-conciliacao-btn').addEventListener('click', () => { const a = document.getElementById('filter-mes-conciliacao'); const b = document.getElementById('filter-categoria-conciliacao'); const c = document.getElementById('filter-tipo-conciliacao'); a.selectedIndex = -1; b.selectedIndex = -1; c.selectedIndex = -1; updateAll(); });
-            document.querySelectorAll('#start-date-filter, #end-date-filter, #filter-situacao, #filter-tipo-debito').forEach(el => el.addEventListener('change', updateAll));
+            document.querySelectorAll('#start-date-filter, #end-date-filter, #filter-situacao, #filter-tipo-debito').forEach(el => el.addEventListener('change', () => { updateAll(); }));
             document.getElementById('clear-filters-btn').addEventListener('click', () => { document.getElementById('start-date-filter').value = ''; document.getElementById('end-date-filter').value = ''; const s = document.getElementById('filter-situacao'); const t = document.getElementById('filter-tipo-debito'); s.selectedIndex = -1; t.selectedIndex = -1; updateAll(); });
             document.querySelectorAll('#dre-content .table-header th').forEach(th => th.addEventListener('click', () => { const key = th.dataset.sortKeyConc; if (key) { state.dreSort.dir = state.dreSort.key === key && state.dreSort.dir === 'asc' ? 'desc' : 'asc'; state.dreSort.key = key; updateAll(); }}));
             document.querySelectorAll('#debitos-content .table-header th').forEach(th => th.addEventListener('click', () => { const key = th.dataset.sortKey; if (key) { state.debitosSort.dir = state.debitosSort.key === key && state.debitosSort.dir === 'asc' ? 'desc' : 'asc'; state.debitosSort.key = key; updateAll(); }}));
@@ -393,6 +427,7 @@
             document.getElementById('filter-mes-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.mes))].map(v => `<option value="${v}">${v}</option>`).join('');
             document.getElementById('filter-categoria-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.categoria))].map(v => `<option value="${v}">${v}</option>`).join('');
             document.getElementById('filter-tipo-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.tipo))].map(v => `<option value="${v}">${v}</option>`).join('');
+            updateFilterBadges();
 
             setupEventListeners();
             updateSidebar();
