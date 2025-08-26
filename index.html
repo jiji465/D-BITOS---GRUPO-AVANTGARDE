@@ -192,7 +192,7 @@
         </main>
     </div>
     
-    <script>
+ <script>
         // =================================================================================
         // BASE DE DADOS
         // =================================================================================
@@ -377,7 +377,6 @@
             { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 695.134,74" },
             { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 167.000,00" }
         ];
-        
         // =================================================================================
         // LÓGICA DO DASHBOARD
         // =================================================================================
@@ -396,7 +395,6 @@
             setBadge('badge-situacao', safeLen('filter-situacao'));
             setBadge('badge-tipo-debito', safeLen('filter-tipo-debito'));
         };
-
         const debitosData = debitosDataRaw.map(d => ({...d, valor: parseCurrency(d.valor), empresa: d.empresa.replace(/ - \(\w+\)/, '').trim() }));
         const conciliacaoData = conciliacaoDataRaw.map(d => {
             const valor = parseCurrency(d.valor);
@@ -407,7 +405,6 @@
             const empresa = d.empresa === 'AGUIAR' ? 'AGUIAR DUARTE SERVICOS MEDICOS LTDA' : (d.empresa === 'CURSOS' ? 'AVANTGARDE CURSOS LTDA' : (d.empresa === 'SPA' ? 'AVANT SPA LTDA' : d.empresa));
             return {...d, valor, tipo, empresa};
         });
-
         const updateAll = () => {
             const selectedCompanies = state.activeCompanies;
             const companyFilter = (d) => selectedCompanies.size === 0 || selectedCompanies.has(d.empresa);
@@ -418,53 +415,24 @@
             updateDebitos(debitos);
             updateFilterBadges();
         };
-        const updateGeral = () => {
-            const filteredDebitos = debitos.filter(d => state.selectedCompanies.includes(d.empresa));
-            const filteredDre = dre.filter(d => state.selectedCompanies.includes(d.empresa));
-            
-            // KPIs principais
-            const totalDebitos = filteredDebitos.reduce((sum, d) => sum + parseCurrency(d.total), 0);
-            const totalReceitas = filteredDre.filter(d => d.tipo === 'Receita').reduce((sum, d) => sum + parseCurrency(d.valor), 0);
-            const totalDespesas = filteredDre.filter(d => d.tipo === 'Despesa').reduce((sum, d) => sum + parseCurrency(d.valor), 0);
+        const updateGeral = (debitos, dre) => {
+            const filteredDebitos = debitos.filter(d => state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa));
+            const filteredDre = dre.filter(d => state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa));
+            const totalDebitos = filteredDebitos.reduce((sum, d) => sum + d.valor, 0);
+            const totalReceitas = filteredDre.filter(d => d.tipo === 'Receita').reduce((sum, d) => sum + d.valor, 0);
+            const totalDespesas = filteredDre.filter(d => d.tipo === 'Despesa').reduce((sum, d) => sum + d.valor, 0);
             const resultadoLiquido = totalReceitas - totalDespesas;
-            
-            // Cálculo de tendências (comparação com período anterior)
-            const empresasCount = state.selectedCompanies.length;
+            const empresasCount = state.activeCompanies.size || filteredDre.length > 0 ? [...new Set(filteredDre.map(d => d.empresa))].length : 0;
             const debitosCount = filteredDebitos.length;
             
-            document.getElementById('kpi-total-debitos').innerHTML = `
-                <div class="text-3xl font-bold text-gray-800">${formatCurrency(totalDebitos)}</div>
-                <div class="text-sm text-gray-600">Total de Débitos</div>
-                <div class="kpi-trend ${debitosCount > 0 ? 'positive' : 'negative'}">
-                    ${debitosCount} débito${debitosCount !== 1 ? 's' : ''} encontrado${debitosCount !== 1 ? 's' : ''}
-                </div>
-            `;
+            document.getElementById('geral-kpi-receita').textContent = formatCurrency(totalReceitas);
+            document.getElementById('geral-kpi-despesa').textContent = formatCurrency(totalDespesas);
+            document.getElementById('geral-kpi-resultado').textContent = formatCurrency(resultadoLiquido);
+            document.getElementById('geral-kpi-divida').textContent = formatCurrency(totalDebitos);
             
-            document.getElementById('kpi-total-receitas').innerHTML = `
-                <div class="text-3xl font-bold text-green-600">${formatCurrency(totalReceitas)}</div>
-                <div class="text-sm text-gray-600">Total de Receitas</div>
-                <div class="kpi-trend positive">
-                    ${filteredDre.filter(d => d.tipo === 'Receita').length} categoria${filteredDre.filter(d => d.tipo === 'Receita').length !== 1 ? 's' : ''}
-                </div>
-            `;
+            const dividaVencida = filteredDebitos.filter(d => d.situacao === 'Vencido').reduce((sum, d) => sum + d.valor, 0);
+            document.getElementById('geral-kpi-vencida').textContent = formatCurrency(dividaVencida);
             
-            document.getElementById('kpi-total-despesas').innerHTML = `
-                <div class="text-3xl font-bold text-red-600">${formatCurrency(totalDespesas)}</div>
-                <div class="text-sm text-gray-600">Total de Despesas</div>
-                <div class="kpi-trend negative">
-                    ${filteredDre.filter(d => d.tipo === 'Despesa').length} categoria${filteredDre.filter(d => d.tipo === 'Despesa').length !== 1 ? 's' : ''}
-                </div>
-            `;
-            
-            document.getElementById('kpi-resultado-liquido').innerHTML = `
-                <div class="text-3xl font-bold ${resultadoLiquido >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(resultadoLiquido)}</div>
-                <div class="text-sm text-gray-600">Resultado Líquido</div>
-                <div class="kpi-trend ${resultadoLiquido >= 0 ? 'positive' : 'negative'}">
-                    ${resultadoLiquido >= 0 ? 'Lucro' : 'Prejuízo'}
-                </div>
-            `;
-            
-            // Atualizar gráficos
             updateGeralCharts(filteredDebitos, filteredDre);
         };
         const updateDRE = (data) => {
@@ -472,7 +440,6 @@
             const categorias = getMultiValues('filter-categoria-conciliacao');
             const tipos = getMultiValues('filter-tipo-conciliacao');
             const filtered = data.filter(d => (meses.length === 0 || meses.includes(d.mes)) && (categorias.length === 0 || categorias.includes(d.categoria)) && (tipos.length === 0 || tipos.includes(d.tipo)));
-            
             const totalReceitas = filtered.filter(d => d.tipo === 'Receita').reduce((sum, i) => sum + i.valor, 0);
             const totalDespesas = filtered.filter(d => d.tipo === 'Despesa').reduce((sum, i) => sum + i.valor, 0);
             document.getElementById('kpi-receitas').textContent = formatCurrency(totalReceitas);
@@ -498,7 +465,15 @@
             charts.revenueVsExpenses.update();
 
             const tableBody = document.getElementById('conciliacao-table-body');
-            tableBody.innerHTML = filtered.sort((a,b) => (a[state.dreSort.key] > b[state.dreSort.key] ? 1 : -1) * (state.dreSort.dir === 'asc' ? 1 : -1)).map(d => `<tr class="table-row border-b"><td class="px-6 py-4">${d.mes}</td><td class="px-6 py-4 font-semibold">${d.categoria}</td><td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${d.tipo === 'Receita' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${d.tipo}</span></td><td class="px-6 py-4 text-right font-bold ${d.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}">${d.tipo === 'Receita' ? '+' : '-'} ${formatCurrency(d.valor)}</td></tr>`).join('');
+            tableBody.innerHTML = filtered.sort((a,b) => {
+                const key = state.dreSort.key;
+                let aVal = a[key];
+                let bVal = b[key];
+                if (key === 'valor') { aVal = a.valor; bVal = b.valor; }
+                if (aVal > bVal) return state.dreSort.dir === 'asc' ? 1 : -1;
+                if (aVal < bVal) return state.dreSort.dir === 'asc' ? -1 : 1;
+                return 0;
+            }).map(d => `<tr class="table-row border-b"><td class="px-6 py-4">${d.mes}</td><td class="px-6 py-4 font-semibold">${d.categoria}</td><td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${d.tipo === 'Receita' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${d.tipo}</span></td><td class="px-6 py-4 text-right font-bold ${d.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}">${d.tipo === 'Receita' ? '+' : '-'} ${formatCurrency(d.valor)}</td></tr>`).join('');
         };
         const updateDebitos = (data) => {
             const situacoes = getMultiValues('filter-situacao');
@@ -506,7 +481,6 @@
             const startDate = document.getElementById('start-date-filter').value ? new Date(document.getElementById('start-date-filter').value + 'T00:00:00') : null;
             const endDate = document.getElementById('end-date-filter').value ? new Date(document.getElementById('end-date-filter').value + 'T23:59:59') : null;
             const filtered = data.filter(d => (!startDate || parseDebitosDate(d.vencimento) >= startDate) && (!endDate || parseDebitosDate(d.vencimento) <= endDate) && (situacoes.length === 0 || situacoes.includes(d.situacao)) && (tiposDebito.length === 0 || tiposDebito.includes(d.tipo)));
-            
             const dividaTotal = data.reduce((sum, item) => sum + item.valor, 0);
             const dividaVencida = data.filter(d => d.situacao === 'Vencido').reduce((sum, item) => sum + item.valor, 0);
             const dividaAVencer = dividaTotal - dividaVencida;
@@ -536,6 +510,7 @@
                 let aVal = a[key];
                 let bVal = b[key];
                 if (key === 'vencimento') { aVal = parseDebitosDate(a.vencimento); bVal = parseDebitosDate(b.vencimento); }
+                if (key === 'valor') { aVal = a.valor; bVal = b.valor; }
                 if (aVal > bVal) return state.debitosSort.dir === 'asc' ? 1 : -1;
                 if (aVal < bVal) return state.debitosSort.dir === 'asc' ? -1 : 1;
                 return 0;
@@ -584,30 +559,8 @@
             }));
             lucide.createIcons();
         };
-
         const createChart = (id, type, data, options) => new Chart(document.getElementById(id).getContext('2d'), { type, data, options });
-
-        window.onload = () => {
-            Chart.defaults.font.family = 'Inter'; Chart.defaults.color = '#6b7280';
-            charts.geralResultado = createChart('geral-resultado-empresa-chart', 'bar', { datasets: [{ label: 'Resultado Líquido', backgroundColor: 'rgba(30, 64, 175, 0.8)', borderRadius: 4 }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } });
-            charts.geralDivida = createChart('geral-divida-empresa-chart', 'bar', { datasets: [{ label: 'Vencido', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 2 }, { label: 'A Vencer', backgroundColor: 'rgba(245, 158, 11, 0.8)', borderRadius: 2 }] }, { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } });
-            charts.debtByType = createChart('debtByTypeChart', 'doughnut', { datasets: [{ backgroundColor: ['#1e40af', '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#9ca3af', '#6b7280'], borderWidth: 4 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } });
-            charts.debtByCompany = createChart('debtByCompanyChart', 'bar', { datasets: [{ label: 'Vencido', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 2 }, { label: 'A Vencer', backgroundColor: 'rgba(245, 158, 11, 0.8)', borderRadius: 2 }] }, { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } });
-            charts.expensesByType = createChart('expensesByTypeChart', 'doughnut', { datasets: [{ backgroundColor: ['#ef4444', '#f87171', '#fca5a5', '#fecaca'], borderWidth: 4 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } });
-            charts.revenueVsExpenses = createChart('revenueVsExpensesChart', 'bar', { datasets: [{ label: 'Receitas', backgroundColor: 'rgba(34, 197, 94, 0.8)', borderRadius: 4 }, { label: 'Despesas', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 4 }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } });
-            
-            document.getElementById('filter-situacao').innerHTML = [...new Set(debitosData.map(d => d.situacao))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-tipo-debito').innerHTML = [...new Set(debitosData.map(d => d.tipo))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-mes-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.mes))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-categoria-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.categoria))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-tipo-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.tipo))].map(v => `<option value="${v}">${v}</option>`).join('');
-            updateFilterBadges();
-
-            setupEventListeners();
-            updateSidebar();
-            updateAll();
-        };
-
+        
         // Funções utilitárias
         const showNotification = (message, type = 'success') => {
             const notification = document.createElement('div');
@@ -623,95 +576,116 @@
         };
 
         const exportToCSV = (data, filename) => {
+            if (data.length === 0) {
+                showNotification('Nenhum dado para exportar', 'error');
+                return;
+            }
             const headers = Object.keys(data[0]);
             const csvContent = [
                 headers.join(','),
                 ...data.map(row => headers.map(header => `"${row[header]}"`).join(','))
             ].join('\n');
-            
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = filename;
             link.click();
+            showNotification('Dados exportados com sucesso!');
         };
 
-        const formatCurrency = (value) => {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(value);
-        };
-
-        const addLoadingState = () => {
-            document.body.classList.add('loading');
-        };
-
-        const removeLoadingState = () => {
-            document.body.classList.remove('loading');
-        };
-
+        const addLoadingState = () => { document.body.classList.add('loading'); };
+        const removeLoadingState = () => { document.body.classList.remove('loading'); };
+        
         const updateGeralCharts = (filteredDebitos, filteredDre) => {
-            // Gráfico de resultado por empresa
             const resultadoPorEmpresa = filteredDre.reduce((acc, { empresa, tipo, valor }) => {
                 if (!acc[empresa]) acc[empresa] = 0;
-                if (tipo === 'Receita') acc[empresa] += parseCurrency(valor);
-                if (tipo === 'Despesa') acc[empresa] -= parseCurrency(valor);
+                if (tipo === 'Receita') acc[empresa] += valor;
+                if (tipo === 'Despesa') acc[empresa] -= valor;
                 return acc;
             }, {});
-            
             charts.geralResultado.data.labels = Object.keys(resultadoPorEmpresa);
             charts.geralResultado.data.datasets[0].data = Object.values(resultadoPorEmpresa);
             charts.geralResultado.update();
             
-            // Gráfico de dívida por empresa
-            const dividaPorEmpresa = filteredDebitos.reduce((acc, { empresa, situacao, total }) => {
+            const dividaPorEmpresa = filteredDebitos.reduce((acc, { empresa, situacao, valor }) => {
                 if (!acc[empresa]) acc[empresa] = { vencido: 0, aVencer: 0 };
-                if (situacao === 'Vencido') acc[empresa].vencido += parseCurrency(total);
-                else acc[empresa].aVencer += parseCurrency(total);
+                if (situacao === 'Vencido') acc[empresa].vencido += valor;
+                else acc[empresa].aVencer += valor;
                 return acc;
             }, {});
-            
             charts.geralDivida.data.labels = Object.keys(dividaPorEmpresa);
             charts.geralDivida.data.datasets[0].data = Object.values(dividaPorEmpresa).map(d => d.vencido);
             charts.geralDivida.data.datasets[1].data = Object.values(dividaPorEmpresa).map(d => d.aVencer);
             charts.geralDivida.update();
         };
 
-        // Event listeners
+        // Event listener de inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            updateAll();
+            // Configuração dos Gráficos
+            Chart.defaults.font.family = 'Inter';
+            Chart.defaults.color = '#6b7280';
+            charts.geralResultado = createChart('geral-resultado-empresa-chart', 'bar', { datasets: [{ label: 'Resultado Líquido', backgroundColor: 'rgba(30, 64, 175, 0.8)', borderRadius: 4 }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } });
+            charts.geralDivida = createChart('geral-divida-empresa-chart', 'bar', { datasets: [{ label: 'Vencido', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 2 }, { label: 'A Vencer', backgroundColor: 'rgba(245, 158, 11, 0.8)', borderRadius: 2 }] }, { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } });
+            charts.debtByType = createChart('debtByTypeChart', 'doughnut', { datasets: [{ backgroundColor: ['#1e40af', '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#9ca3af', '#6b7280'], borderWidth: 4 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } });
+            charts.debtByCompany = createChart('debtByCompanyChart', 'bar', { datasets: [{ label: 'Vencido', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 2 }, { label: 'A Vencer', backgroundColor: 'rgba(245, 158, 11, 0.8)', borderRadius: 2 }] }, { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } });
+            charts.expensesByType = createChart('expensesByTypeChart', 'doughnut', { datasets: [{ backgroundColor: ['#ef4444', '#f87171', '#fca5a5', '#fecaca'], borderWidth: 4 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } });
+            charts.revenueVsExpenses = createChart('revenueVsExpensesChart', 'bar', { datasets: [{ label: 'Receitas', backgroundColor: 'rgba(34, 197, 94, 0.8)', borderRadius: 4 }, { label: 'Despesas', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 4 }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } });
+
+            // População dos Filtros
+            document.getElementById('filter-situacao').innerHTML = [...new Set(debitosData.map(d => d.situacao))].map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('filter-tipo-debito').innerHTML = [...new Set(debitosData.map(d => d.tipo))].map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('filter-mes-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.mes))].map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('filter-categoria-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.categoria))].map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('filter-tipo-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.tipo))].map(v => `<option value="${v}">${v}</option>`).join('');
             
-            // Event listeners para novos botões
+            // Configuração dos Eventos
+            setupEventListeners();
+            
+            // Event listeners para botões de exportar e atualizar
             document.getElementById('export-btn').addEventListener('click', () => {
                 addLoadingState();
                 setTimeout(() => {
-                    const currentTab = state.activeTab;
+                    const companyFilter = (d) => state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa);
                     let dataToExport = [];
                     let filename = '';
                     
-                    switch(currentTab) {
+                    switch(state.activeTab) {
                         case 'geral':
-                            dataToExport = debitos.filter(d => state.selectedCompanies.includes(d.empresa));
-                            filename = 'dados_gerais.csv';
+                             // A aba geral mostra um resumo dos débitos, então exportamos os débitos filtrados por empresa.
+                            dataToExport = debitosData.filter(companyFilter);
+                            filename = 'dados_gerais_debitos.csv';
                             break;
                         case 'dre':
-                            dataToExport = dre.filter(d => state.selectedCompanies.includes(d.empresa));
+                             // Para a DRE, aplicamos o filtro de empresa e os filtros específicos da aba.
+                            const meses = getMultiValues('filter-mes-conciliacao');
+                            const categorias = getMultiValues('filter-categoria-conciliacao');
+                            const tipos = getMultiValues('filter-tipo-conciliacao');
+                            dataToExport = conciliacaoData.filter(d => 
+                                companyFilter(d) &&
+                                (meses.length === 0 || meses.includes(d.mes)) && 
+                                (categorias.length === 0 || categorias.includes(d.categoria)) && 
+                                (tipos.length === 0 || tipos.includes(d.tipo))
+                            );
                             filename = 'dados_dre.csv';
                             break;
                         case 'debitos':
-                            dataToExport = debitos.filter(d => state.selectedCompanies.includes(d.empresa));
+                            // Para débitos, aplicamos o filtro de empresa e os filtros da aba de débitos.
+                            const situacoes = getMultiValues('filter-situacao');
+                            const tiposDebito = getMultiValues('filter-tipo-debito');
+                            const startDate = document.getElementById('start-date-filter').value ? new Date(document.getElementById('start-date-filter').value + 'T00:00:00') : null;
+                            const endDate = document.getElementById('end-date-filter').value ? new Date(document.getElementById('end-date-filter').value + 'T23:59:59') : null;
+                            dataToExport = debitosData.filter(d => 
+                                companyFilter(d) &&
+                                (!startDate || parseDebitosDate(d.vencimento) >= startDate) && 
+                                (!endDate || parseDebitosDate(d.vencimento) <= endDate) && 
+                                (situacoes.length === 0 || situacoes.includes(d.situacao)) && 
+                                (tiposDebito.length === 0 || tiposDebito.includes(d.tipo))
+                            );
                             filename = 'dados_debitos.csv';
                             break;
                     }
                     
-                    if (dataToExport.length > 0) {
-                        exportToCSV(dataToExport, filename);
-                        showNotification('Dados exportados com sucesso!');
-                    } else {
-                        showNotification('Nenhum dado para exportar', 'error');
-                    }
+                    exportToCSV(dataToExport, filename);
                     removeLoadingState();
                 }, 500);
             });
@@ -724,7 +698,12 @@
                     removeLoadingState();
                 }, 800);
             });
+
+            // Primeira Carga
+            updateSidebar();
+            updateAll();
         });
     </script>
 </body>
 </html>
+
