@@ -51,6 +51,20 @@
         .filter-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: .04em; }
         .filter-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.25rem; height: 1.25rem; padding: 0 0.35rem; border-radius: 9999px; background: #e5edff; color: #1e40af; font-size: 0.7rem; font-weight: 700; }
         .filter-actions { grid-column: span 2 / span 2; display: flex; gap: 0.5rem; justify-content: flex-end; }
+        .loading { opacity: 0.6; pointer-events: none; }
+        .tooltip { position: relative; }
+        .tooltip:hover::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; white-space: nowrap; z-index: 50; }
+        .export-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; }
+        .export-btn:hover { background: linear-gradient(135deg, #059669, #047857); }
+        .kpi-trend { font-size: 0.875rem; margin-top: 0.25rem; }
+        .kpi-trend.positive { color: #10b981; }
+        .kpi-trend.negative { color: #ef4444; }
+        .table-row:nth-child(even) { background-color: #f9fafb; }
+        .table-row:nth-child(odd) { background-color: #ffffff; }
+        .notification { position: fixed; top: 1rem; right: 1rem; padding: 1rem; border-radius: 0.5rem; color: white; z-index: 1000; transform: translateX(100%); transition: transform 0.3s ease; }
+        .notification.show { transform: translateX(0); }
+        .notification.success { background: #10b981; }
+        .notification.error { background: #ef4444; }
     </style>
 </head>
 <body class="flex min-h-screen">
@@ -68,6 +82,14 @@
     <div class="flex-1 flex flex-col">
         <header class="app-header backdrop-blur-sm border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-20">
              <h1 id="header-title" class="text-2xl font-bold text-gray-800">Painel Estratégico</h1>
+             <div class="flex items-center gap-3">
+                 <button id="export-btn" class="export-btn px-4 py-2 rounded-lg font-medium transition-all duration-200 tooltip" data-tooltip="Exportar dados filtrados">
+                     <i data-lucide="download" class="w-4 h-4 mr-2"></i>Exportar
+                 </button>
+                 <button id="refresh-btn" class="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition tooltip" data-tooltip="Atualizar dados">
+                     <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                 </button>
+             </div>
         </header>
         
         <div class="px-8 border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-[73px] z-10">
@@ -109,18 +131,18 @@
                         <div class="filter-grid">
                             <div class="filter-field">
                                 <label class="filter-label"><i data-lucide="calendar-days" class="w-4 h-4"></i> Mês <span id="badge-mes" class="filter-badge">0</span></label>
-                                <select id="filter-mes-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select>
+                                <select id="filter-mes-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2 tooltip" data-tooltip="Selecione um ou mais meses para filtrar"></select>
                             </div>
                             <div class="filter-field wide">
                                 <label class="filter-label"><i data-lucide="filter" class="w-4 h-4"></i> Categoria <span id="badge-categoria" class="filter-badge">0</span></label>
-                                <select id="filter-categoria-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select>
+                                <select id="filter-categoria-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2 tooltip" data-tooltip="Selecione uma ou mais categorias"></select>
                             </div>
                             <div class="filter-field">
                                 <label class="filter-label"><i data-lucide="layers" class="w-4 h-4"></i> Tipo <span id="badge-tipo" class="filter-badge">0</span></label>
-                                <select id="filter-tipo-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select>
+                                <select id="filter-tipo-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2 tooltip" data-tooltip="Filtrar por Receita ou Despesa"></select>
                             </div>
                             <div class="filter-actions">
-                                <button id="clear-filters-conciliacao-btn" class="px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition">Limpar</button>
+                                <button id="clear-filters-conciliacao-btn" class="px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition tooltip" data-tooltip="Limpar todos os filtros aplicados">Limpar</button>
                             </div>
                         </div>
                     </div>
@@ -145,22 +167,22 @@
                         <div class="filter-grid">
                             <div class="filter-field">
                                 <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Início</label>
-                                <input type="date" id="start-date-filter" class="filter-input p-2 w-full">
+                                <input type="date" id="start-date-filter" class="filter-input p-2 w-full tooltip" data-tooltip="Data inicial para filtrar débitos">
                             </div>
                             <div class="filter-field">
                                 <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Fim</label>
-                                <input type="date" id="end-date-filter" class="filter-input p-2 w-full">
+                                <input type="date" id="end-date-filter" class="filter-input p-2 w-full tooltip" data-tooltip="Data final para filtrar débitos">
                             </div>
                             <div class="filter-field">
                                 <label class="filter-label"><i data-lucide="filter" class="w-4 h-4"></i> Situação <span id="badge-situacao" class="filter-badge">0</span></label>
-                                <select id="filter-situacao" multiple class="filter-input p-2 w-full"></select>
+                                <select id="filter-situacao" multiple class="filter-input p-2 w-full tooltip" data-tooltip="Selecione uma ou mais situações"></select>
                             </div>
                             <div class="filter-field">
                                 <label class="filter-label"><i data-lucide="list-tree" class="w-4 h-4"></i> Tipo <span id="badge-tipo-debito" class="filter-badge">0</span></label>
-                                <select id="filter-tipo-debito" multiple class="filter-input p-2 w-full"></select>
+                                <select id="filter-tipo-debito" multiple class="filter-input p-2 w-full tooltip" data-tooltip="Selecione um ou mais tipos de débito"></select>
                             </div>
                             <div class="filter-actions">
-                                <button id="clear-filters-btn" class="px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition">Limpar</button>
+                                <button id="clear-filters-btn" class="px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition tooltip" data-tooltip="Limpar todos os filtros aplicados">Limpar</button>
                             </div>
                         </div>
                     </div>
@@ -221,7 +243,139 @@
             { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'ISS', competencia: '04/2024', vencimento: '10/05/2024', valor: 'R$ 1.053,49', situacao: 'Vencido', tipo: 'ISS' },
         ];
         const conciliacaoDataRaw = [
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 16.739,27" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 5.193,52" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA COM DIRETORIA", valor: "R$ 5.000,00" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 12.730,11" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA FINANCEIRA", valor: "R$ 20.005,00" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA OPERACIONAL", valor: "R$ 1.997,26" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 10.465,71" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "EMPRÉSTIMO", valor: "R$ 4.086,01" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 12.802,63" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 145.682,99" }, { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 29.308,50" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 31.638,50" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 6.432,10" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA COM DIRETORIA", valor: "R$ 55.000,00" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 11.601,73" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 111,00" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA OPERACIONAL", valor: "R$ 809,55" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 10.324,54" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "EMPRÉSTIMO", valor: "R$ 4.085,20" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 7.859,09" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 108.662,02" }, { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 59.000,00" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 33.032,60" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 12.144,86" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA COM DIRETORIA", valor: "R$ 10.000,00" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 15.347,19" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA OPERACIONAL", valor: "R$ 2.510,50" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 10.251,77" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "EMPRÉSTIMO", valor: "R$ 4.084,39" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 6.267,26" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 204.200,72" }, { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 104.800,00" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 6.855,38" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 6.660,00" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 14.369,77" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 103.153,50" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 18.724,75" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 27.000,00" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "EMPRÉSTIMO", valor: "R$ 6.414,50" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 25.205,28" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 223.054,63" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 32.945,24" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 1.691,50" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 22.944,24" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 50.739,88" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 111,00" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 17.334,84" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 45.000,00" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "EMPRÉSTIMO", valor: "R$ 6.413,32" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 17.885,50" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "OUTRAS RECEITAS", valor: "R$ 19.000,00" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 235.209,81" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 75.000,00" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 84.382,72" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 12.140,10" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 58.201,66" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 36.391,42" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 18.920,38" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 104.000,00" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "EMPRÉSTIMO", valor: "R$ 6.412,10" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "ESTORNO DE PAGAMENTO", valor: "R$ 750,00" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 17.764,12" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 301.417,26" }, { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 63.900,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 6.237,27" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 80.560,51" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 50.199,86" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA FINANCEIRA", valor: "R$ 105,43" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 11.699,48" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESAS COMERCIAIS", valor: "R$ 10.527,60" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 128.000,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 14.834,04" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 331.720,84" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "EMPRÉSTIMO", valor: "R$ 10.888,09" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 27.690,27" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 123.476,14" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 54.605,24" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 56,82" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 500,90" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 11.050,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 10.000,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 38.810,42" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "OUTRAS RECEITAS", valor: "R$ 32.000,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 265.970,49" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 17.000,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "EMPRÉSTIMO", valor: "R$ 11.348,62" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 28.290,28" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 6.875,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 137.165,53" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 42.919,86" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA FINANCEIRA", valor: "R$ 142,88" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 6.459,95" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 24.908,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 103.000,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 952,89" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 472.575,55" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 134.300,00" }, { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "EMPRÉSTIMO", valor: "R$ 10.901,30" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 16.739,27" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 5.193,52" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 5.000,00" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 12.730,11" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA FINANCEIRA", valor: "R$ 20.005,00" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA OPERACIONAL", valor: "R$ 1.997,26" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 10.465,71" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "EMPRÉSTIMO", valor: "R$ 4.086,01" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 12.802,63" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 145.682,99" },
+            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 29.308,50" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 31.638,50" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 6.432,10" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 55.000,00" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 11.601,73" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 111,00" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA OPERACIONAL", valor: "R$ 809,55" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 10.324,54" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "EMPRÉSTIMO", valor: "R$ 4.085,20" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 7.859,09" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 108.662,02" },
+            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 59.000,00" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 33.032,60" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 12.144,86" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 10.000,00" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 15.347,19" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA OPERACIONAL", valor: "R$ 2.510,50" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 10.251,77" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "EMPRÉSTIMO", valor: "R$ 4.084,39" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 6.267,26" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 204.200,72" },
+            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 104.800,00" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 6.855,38" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 6.660,00" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 14.369,77" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 103.153,50" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 18.724,75" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 27.000,00" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "EMPRÉSTIMO", valor: "R$ 6.414,50" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 25.205,28" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 223.054,63" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 32.945,24" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 1.691,50" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 22.944,24" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 50.739,88" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 111,00" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 17.334,84" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 45.000,00" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "EMPRÉSTIMO", valor: "R$ 6.413,32" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 17.885,50" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "OUTRAS RECEITAS", valor: "R$ 19.000,00" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 235.209,81" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 75.000,00" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 84.382,72" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 12.140,10" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 58.201,66" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 36.391,42" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 18.920,38" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 104.000,00" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "EMPRÉSTIMO", valor: "R$ 6.412,10" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "ESTORNO DE PAGAMENTO", valor: "R$ 750,00" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 17.764,12" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 301.417,26" },
+            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 63.900,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 6.237,27" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 80.560,51" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 50.199,86" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA FINANCEIRA", valor: "R$ 105,43" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 11.699,48" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESAS COMERCIAIS", valor: "R$ 10.527,60" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 128.000,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 14.834,04" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 331.720,84" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "EMPRÉSTIMO", valor: "R$ 10.888,09" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 27.690,27" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 123.476,14" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 54.605,24" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 56,82" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 500,90" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 11.050,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 10.000,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 38.810,42" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "OUTRAS RECEITAS", valor: "R$ 32.000,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 265.970,49" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 17.000,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "EMPRÉSTIMO", valor: "R$ 11.348,62" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 28.290,28" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 6.875,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 137.165,53" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 42.919,86" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA FINANCEIRA", valor: "R$ 142,88" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 6.459,95" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 24.908,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 103.000,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 952,89" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 472.575,55" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 134.300,00" },
+            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "EMPRÉSTIMO", valor: "R$ 10.901,30" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 26.927,17" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 134.216,40" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 29.189,82" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 106.507,57" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 59.409,93" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA FINANCEIRA", valor: "R$ 143,10" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 30.933,71" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESAS COMERCIAIS", valor: "R$ 16.000,00" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 78.146,37" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 42.729,36" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 584.851,96" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 8.000,00" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 89.168,92" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 101.916,15" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 11.020,22" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 81.641,54" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 131,10" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 20.933,30" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 13.000,00" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 40.000,00" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 69.693,58" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "OUTRAS RECEITAS", valor: "R$ 23.000,00" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 521.349,45" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 161.500,00" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 67.800,74" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 186.686,54" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 38.511,28" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 79.249,39" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESA FINANCEIRA", valor: "R$ 131,10" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 23.256,29" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 15.599,11" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 99.546,37" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 21.320,34" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 695.134,74" },
+            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 167.000,00" }
         ];
         
         // =================================================================================
@@ -264,37 +418,54 @@
             updateDebitos(debitos);
             updateFilterBadges();
         };
-        const updateGeral = (debitos, dre) => {
-            const totalReceitas = dre.filter(d => d.tipo === 'Receita').reduce((sum, item) => sum + item.valor, 0);
-            const totalDespesasCustos = dre.filter(d => d.tipo === 'Despesa').reduce((sum, item) => sum + item.valor, 0);
-            const resultadoLiquido = totalReceitas - totalDespesasCustos;
-            const dividaTotal = debitos.reduce((sum, item) => sum + item.valor, 0);
-            const dividaVencida = debitos.filter(d => d.situacao === 'Vencido').reduce((sum, item) => sum + item.valor, 0);
-            document.getElementById('geral-kpi-receita').textContent = formatCurrency(totalReceitas);
-            document.getElementById('geral-kpi-despesa').textContent = formatCurrency(totalDespesasCustos);
-            document.getElementById('geral-kpi-resultado').textContent = formatCurrency(resultadoLiquido);
-            document.getElementById('geral-kpi-divida').textContent = formatCurrency(dividaTotal);
-            document.getElementById('geral-kpi-vencida').textContent = formatCurrency(dividaVencida);
-
-            const resultadoPorEmpresa = dre.reduce((acc, { empresa, tipo, valor }) => {
-                if (!acc[empresa]) acc[empresa] = 0;
-                if (tipo === 'Receita') acc[empresa] += valor;
-                if (tipo === 'Despesa') acc[empresa] -= valor;
-                return acc;
-            }, {});
-            charts.geralResultado.data.labels = Object.keys(resultadoPorEmpresa);
-            charts.geralResultado.data.datasets[0].data = Object.values(resultadoPorEmpresa);
-            charts.geralResultado.update();
+        const updateGeral = () => {
+            const filteredDebitos = debitos.filter(d => state.selectedCompanies.includes(d.empresa));
+            const filteredDre = dre.filter(d => state.selectedCompanies.includes(d.empresa));
             
-            const dividaPorEmpresa = debitos.reduce((acc, { empresa, situacao, valor }) => {
-                if (!acc[empresa]) acc[empresa] = { vencido: 0, aVencer: 0 };
-                if (situacao === 'Vencido') acc[empresa].vencido += valor; else acc[empresa].aVencer += valor;
-                return acc;
-            }, {});
-            charts.geralDivida.data.labels = Object.keys(dividaPorEmpresa);
-            charts.geralDivida.data.datasets[0].data = Object.values(dividaPorEmpresa).map(d => d.vencido);
-            charts.geralDivida.data.datasets[1].data = Object.values(dividaPorEmpresa).map(d => d.aVencer);
-            charts.geralDivida.update();
+            // KPIs principais
+            const totalDebitos = filteredDebitos.reduce((sum, d) => sum + parseCurrency(d.total), 0);
+            const totalReceitas = filteredDre.filter(d => d.tipo === 'Receita').reduce((sum, d) => sum + parseCurrency(d.valor), 0);
+            const totalDespesas = filteredDre.filter(d => d.tipo === 'Despesa').reduce((sum, d) => sum + parseCurrency(d.valor), 0);
+            const resultadoLiquido = totalReceitas - totalDespesas;
+            
+            // Cálculo de tendências (comparação com período anterior)
+            const empresasCount = state.selectedCompanies.length;
+            const debitosCount = filteredDebitos.length;
+            
+            document.getElementById('kpi-total-debitos').innerHTML = `
+                <div class="text-3xl font-bold text-gray-800">${formatCurrency(totalDebitos)}</div>
+                <div class="text-sm text-gray-600">Total de Débitos</div>
+                <div class="kpi-trend ${debitosCount > 0 ? 'positive' : 'negative'}">
+                    ${debitosCount} débito${debitosCount !== 1 ? 's' : ''} encontrado${debitosCount !== 1 ? 's' : ''}
+                </div>
+            `;
+            
+            document.getElementById('kpi-total-receitas').innerHTML = `
+                <div class="text-3xl font-bold text-green-600">${formatCurrency(totalReceitas)}</div>
+                <div class="text-sm text-gray-600">Total de Receitas</div>
+                <div class="kpi-trend positive">
+                    ${filteredDre.filter(d => d.tipo === 'Receita').length} categoria${filteredDre.filter(d => d.tipo === 'Receita').length !== 1 ? 's' : ''}
+                </div>
+            `;
+            
+            document.getElementById('kpi-total-despesas').innerHTML = `
+                <div class="text-3xl font-bold text-red-600">${formatCurrency(totalDespesas)}</div>
+                <div class="text-sm text-gray-600">Total de Despesas</div>
+                <div class="kpi-trend negative">
+                    ${filteredDre.filter(d => d.tipo === 'Despesa').length} categoria${filteredDre.filter(d => d.tipo === 'Despesa').length !== 1 ? 's' : ''}
+                </div>
+            `;
+            
+            document.getElementById('kpi-resultado-liquido').innerHTML = `
+                <div class="text-3xl font-bold ${resultadoLiquido >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(resultadoLiquido)}</div>
+                <div class="text-sm text-gray-600">Resultado Líquido</div>
+                <div class="kpi-trend ${resultadoLiquido >= 0 ? 'positive' : 'negative'}">
+                    ${resultadoLiquido >= 0 ? 'Lucro' : 'Prejuízo'}
+                </div>
+            `;
+            
+            // Atualizar gráficos
+            updateGeralCharts(filteredDebitos, filteredDre);
         };
         const updateDRE = (data) => {
             const meses = getMultiValues('filter-mes-conciliacao');
@@ -436,6 +607,124 @@
             updateSidebar();
             updateAll();
         };
+
+        // Funções utilitárias
+        const showNotification = (message, type = 'success') => {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        };
+
+        const exportToCSV = (data, filename) => {
+            const headers = Object.keys(data[0]);
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => headers.map(header => `"${row[header]}"`).join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        };
+
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        };
+
+        const addLoadingState = () => {
+            document.body.classList.add('loading');
+        };
+
+        const removeLoadingState = () => {
+            document.body.classList.remove('loading');
+        };
+
+        const updateGeralCharts = (filteredDebitos, filteredDre) => {
+            // Gráfico de resultado por empresa
+            const resultadoPorEmpresa = filteredDre.reduce((acc, { empresa, tipo, valor }) => {
+                if (!acc[empresa]) acc[empresa] = 0;
+                if (tipo === 'Receita') acc[empresa] += parseCurrency(valor);
+                if (tipo === 'Despesa') acc[empresa] -= parseCurrency(valor);
+                return acc;
+            }, {});
+            
+            charts.geralResultado.data.labels = Object.keys(resultadoPorEmpresa);
+            charts.geralResultado.data.datasets[0].data = Object.values(resultadoPorEmpresa);
+            charts.geralResultado.update();
+            
+            // Gráfico de dívida por empresa
+            const dividaPorEmpresa = filteredDebitos.reduce((acc, { empresa, situacao, total }) => {
+                if (!acc[empresa]) acc[empresa] = { vencido: 0, aVencer: 0 };
+                if (situacao === 'Vencido') acc[empresa].vencido += parseCurrency(total);
+                else acc[empresa].aVencer += parseCurrency(total);
+                return acc;
+            }, {});
+            
+            charts.geralDivida.data.labels = Object.keys(dividaPorEmpresa);
+            charts.geralDivida.data.datasets[0].data = Object.values(dividaPorEmpresa).map(d => d.vencido);
+            charts.geralDivida.data.datasets[1].data = Object.values(dividaPorEmpresa).map(d => d.aVencer);
+            charts.geralDivida.update();
+        };
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updateAll();
+            
+            // Event listeners para novos botões
+            document.getElementById('export-btn').addEventListener('click', () => {
+                addLoadingState();
+                setTimeout(() => {
+                    const currentTab = state.activeTab;
+                    let dataToExport = [];
+                    let filename = '';
+                    
+                    switch(currentTab) {
+                        case 'geral':
+                            dataToExport = debitos.filter(d => state.selectedCompanies.includes(d.empresa));
+                            filename = 'dados_gerais.csv';
+                            break;
+                        case 'dre':
+                            dataToExport = dre.filter(d => state.selectedCompanies.includes(d.empresa));
+                            filename = 'dados_dre.csv';
+                            break;
+                        case 'debitos':
+                            dataToExport = debitos.filter(d => state.selectedCompanies.includes(d.empresa));
+                            filename = 'dados_debitos.csv';
+                            break;
+                    }
+                    
+                    if (dataToExport.length > 0) {
+                        exportToCSV(dataToExport, filename);
+                        showNotification('Dados exportados com sucesso!');
+                    } else {
+                        showNotification('Nenhum dado para exportar', 'error');
+                    }
+                    removeLoadingState();
+                }, 500);
+            });
+            
+            document.getElementById('refresh-btn').addEventListener('click', () => {
+                addLoadingState();
+                setTimeout(() => {
+                    updateAll();
+                    showNotification('Dados atualizados!');
+                    removeLoadingState();
+                }, 800);
+            });
+        });
     </script>
 </body>
 </html>
