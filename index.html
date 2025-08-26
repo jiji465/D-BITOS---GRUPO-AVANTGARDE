@@ -93,8 +93,9 @@
                     <div class="filter-bar flex items-center justify-between gap-4 flex-wrap">
                         <h3 class="text-xl font-bold text-gray-800">Lançamentos</h3>
                         <div class="flex items-center gap-3 flex-wrap">
-                            <div class="filter-input-group"><i data-lucide="calendar-days" class="w-4 h-4"></i><select id="filter-mes-conciliacao" class="filter-input text-gray-900 text-sm font-medium block w-full p-2 appearance-none"></select></div>
-                            <div class="filter-input-group"><i data-lucide="filter" class="w-4 h-4"></i><select id="filter-categoria-conciliacao" class="filter-input text-gray-900 text-sm font-medium block w-full p-2 appearance-none"></select></div>
+                            <div class="filter-input-group"><i data-lucide="calendar-days" class="w-4 h-4"></i><select id="filter-mes-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select></div>
+                            <div class="filter-input-group"><i data-lucide="filter" class="w-4 h-4"></i><select id="filter-categoria-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select></div>
+                            <div class="filter-input-group"><i data-lucide="layers" class="w-4 h-4"></i><select id="filter-tipo-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2"></select></div>
                             <button id="clear-filters-conciliacao-btn" class="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" title="Limpar Filtros"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
                         </div>
                     </div>
@@ -120,7 +121,8 @@
                             <div class="filter-input-group"><i data-lucide="calendar" class="w-4 h-4"></i><input type="date" id="start-date-filter" class="filter-input p-2"></div>
                             <span class="text-gray-500">até</span>
                             <div class="filter-input-group"><i data-lucide="calendar" class="w-4 h-4"></i><input type="date" id="end-date-filter" class="filter-input p-2"></div>
-                            <div class="filter-input-group"><i data-lucide="filter" class="w-4 h-4"></i><select id="filter-situacao" class="filter-input p-2 appearance-none"></select></div>
+                            <div class="filter-input-group"><i data-lucide="filter" class="w-4 h-4"></i><select id="filter-situacao" multiple class="filter-input p-2"></select></div>
+                            <div class="filter-input-group"><i data-lucide="list-tree" class="w-4 h-4"></i><select id="filter-tipo-debito" multiple class="filter-input p-2"></select></div>
                             <button id="clear-filters-btn" class="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition" title="Limpar Filtros"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
                         </div>
                     </div>
@@ -187,22 +189,28 @@
         // =================================================================================
         // LÓGICA DO DASHBOARD
         // =================================================================================
-        const state = { activeCompany: 'Todas', activeTab: 'geral', debitosSort: { key: 'vencimento', dir: 'asc' }, dreSort: { key: 'valor', dir: 'desc' } };
+        const state = { activeCompanies: new Set(), activeTab: 'geral', debitosSort: { key: 'vencimento', dir: 'asc' }, dreSort: { key: 'valor', dir: 'desc' } };
         const charts = {};
         const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
         const parseCurrency = (str) => typeof str === 'string' ? parseFloat(str.replace(/[^0-9,-]+/g,"").replace(/\./g,'').replace(',', '.')) : str;
         const parseDebitosDate = (d) => { const [day, month, year] = d.split('/'); return new Date(year, month - 1, day); };
+        const getMultiValues = (selectId) => { const el = document.getElementById(selectId); return Array.from(el.selectedOptions).map(o => o.value); };
 
         const debitosData = debitosDataRaw.map(d => ({...d, valor: parseCurrency(d.valor), empresa: d.empresa.replace(/ - \(\w+\)/, '').trim() }));
         const conciliacaoData = conciliacaoDataRaw.map(d => {
             const valor = parseCurrency(d.valor);
-            const tipo = d.categoria.includes('RECEITA') ? 'Receita' : (d.categoria.startsWith('CUSTO') || d.categoria.startsWith('DESPESA') ? (d.categoria.startsWith('CUSTO') ? 'Custo' : 'Despesa') : 'Não Operacional');
+            let tipo = 'Não Operacional';
+            if (d.categoria.startsWith('DEDUÇÃO') || d.categoria.includes('IMPOSTO SOBRE VENDAS')) tipo = 'Dedução';
+            else if (d.categoria.includes('RECEITA')) tipo = 'Receita';
+            else if (d.categoria.startsWith('CUSTO')) tipo = 'Custo';
+            else if (d.categoria.startsWith('DESPESA') || d.categoria === 'EMPRÉSTIMO') tipo = 'Despesa';
             const empresa = d.empresa === 'AGUIAR' ? 'AGUIAR DUARTE SERVICOS MEDICOS LTDA' : (d.empresa === 'CURSOS' ? 'AVANTGARDE CURSOS LTDA' : (d.empresa === 'SPA' ? 'AVANT SPA LTDA' : d.empresa));
             return {...d, valor, tipo, empresa};
         });
 
         const updateAll = () => {
-            const companyFilter = (d) => state.activeCompany === 'Todas' || d.empresa.startsWith(state.activeCompany);
+            const selectedCompanies = state.activeCompanies;
+            const companyFilter = (d) => selectedCompanies.size === 0 || selectedCompanies.has(d.empresa);
             const debitos = debitosData.filter(companyFilter);
             const dre = conciliacaoData.filter(companyFilter);
             updateGeral(debitos, dre);
@@ -211,12 +219,13 @@
         };
         const updateGeral = (debitos, dre) => {
             const totalReceitas = dre.filter(d => d.tipo === 'Receita').reduce((sum, item) => sum + item.valor, 0);
-            const totalDespesas = dre.filter(d => d.tipo === 'Despesa' || d.tipo === 'Custo').reduce((sum, item) => sum + item.valor, 0);
-            const resultadoLiquido = totalReceitas - totalDespesas;
+            const totalDeducoes = dre.filter(d => d.tipo === 'Dedução').reduce((sum, item) => sum + item.valor, 0);
+            const totalDespesasCustos = dre.filter(d => d.tipo === 'Despesa' || d.tipo === 'Custo').reduce((sum, item) => sum + item.valor, 0);
+            const resultadoLiquido = totalReceitas - totalDeducoes - totalDespesasCustos;
             const dividaTotal = debitos.reduce((sum, item) => sum + item.valor, 0);
             const dividaVencida = debitos.filter(d => d.situacao === 'Vencido').reduce((sum, item) => sum + item.valor, 0);
             document.getElementById('geral-kpi-receita').textContent = formatCurrency(totalReceitas);
-            document.getElementById('geral-kpi-despesa').textContent = formatCurrency(totalDespesas);
+            document.getElementById('geral-kpi-despesa').textContent = formatCurrency(totalDeducoes + totalDespesasCustos);
             document.getElementById('geral-kpi-resultado').textContent = formatCurrency(resultadoLiquido);
             document.getElementById('geral-kpi-divida').textContent = formatCurrency(dividaTotal);
             document.getElementById('geral-kpi-vencida').textContent = formatCurrency(dividaVencida);
@@ -242,25 +251,27 @@
             charts.geralDivida.update();
         };
         const updateDRE = (data) => {
-            const mesFilter = document.getElementById('filter-mes-conciliacao').value;
-            const catFilter = document.getElementById('filter-categoria-conciliacao').value;
-            const filtered = data.filter(d => (mesFilter === 'Todos' || d.mes === mesFilter) && (catFilter === 'Todos' || d.categoria === catFilter));
+            const meses = getMultiValues('filter-mes-conciliacao');
+            const categorias = getMultiValues('filter-categoria-conciliacao');
+            const tipos = getMultiValues('filter-tipo-conciliacao');
+            const filtered = data.filter(d => (meses.length === 0 || meses.includes(d.mes)) && (categorias.length === 0 || categorias.includes(d.categoria)) && (tipos.length === 0 || tipos.includes(d.tipo)));
             
-            const totalReceitas = data.filter(d => d.tipo === 'Receita').reduce((sum, i) => sum + i.valor, 0);
-            const totalDespesas = data.filter(d => d.tipo === 'Despesa' || d.tipo === 'Custo').reduce((sum, i) => sum + i.valor, 0);
+            const totalReceitas = filtered.filter(d => d.tipo === 'Receita').reduce((sum, i) => sum + i.valor, 0);
+            const totalDeducoes = filtered.filter(d => d.tipo === 'Dedução').reduce((sum, i) => sum + i.valor, 0);
+            const totalDespesas = filtered.filter(d => d.tipo === 'Despesa' || d.tipo === 'Custo').reduce((sum, i) => sum + i.valor, 0);
             document.getElementById('kpi-receitas').textContent = formatCurrency(totalReceitas);
-            document.getElementById('kpi-despesas').textContent = formatCurrency(totalDespesas);
-            document.getElementById('kpi-resultado').textContent = formatCurrency(totalReceitas - totalDespesas);
+            document.getElementById('kpi-despesas').textContent = formatCurrency(totalDeducoes + totalDespesas);
+            document.getElementById('kpi-resultado').textContent = formatCurrency(totalReceitas - totalDeducoes - totalDespesas);
 
             const expensesByType = filtered.filter(d => d.tipo === 'Despesa' || d.tipo === 'Custo').reduce((acc, d) => { acc[d.categoria] = (acc[d.categoria] || 0) + d.valor; return acc; }, {});
             charts.expensesByType.data.labels = Object.keys(expensesByType);
             charts.expensesByType.data.datasets[0].data = Object.values(expensesByType);
             charts.expensesByType.update();
 
-            const monthlySummary = data.reduce((acc, d) => {
+            const monthlySummary = filtered.reduce((acc, d) => {
                 if (!acc[d.mes]) acc[d.mes] = { receitas: 0, despesas: 0 };
                 if (d.tipo === 'Receita') acc[d.mes].receitas += d.valor;
-                if (d.tipo === 'Despesa' || d.tipo === 'Custo') acc[d.mes].despesas += d.valor;
+                if (d.tipo === 'Despesa' || d.tipo === 'Custo' || d.tipo === 'Dedução') acc[d.mes].despesas += d.valor;
                 return acc;
             }, {});
             const monthOrder = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -271,13 +282,14 @@
             charts.revenueVsExpenses.update();
 
             const tableBody = document.getElementById('conciliacao-table-body');
-            tableBody.innerHTML = filtered.sort((a,b) => (a[state.dreSort.key] > b[state.dreSort.key] ? 1 : -1) * (state.dreSort.dir === 'asc' ? 1 : -1)).map(d => `<tr class="table-row border-b"><td class="px-6 py-4">${d.mes}</td><td class="px-6 py-4 font-semibold">${d.categoria}</td><td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${d.tipo === 'Receita' ? 'bg-green-100 text-green-700' : (d.tipo === 'Despesa' ? 'bg-red-100 text-red-700' : (d.tipo === 'Custo' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'))}">${d.tipo}</span></td><td class="px-6 py-4 text-right font-bold ${d.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}">${d.tipo === 'Receita' ? '+' : '-'} ${formatCurrency(d.valor)}</td></tr>`).join('');
+            tableBody.innerHTML = filtered.sort((a,b) => (a[state.dreSort.key] > b[state.dreSort.key] ? 1 : -1) * (state.dreSort.dir === 'asc' ? 1 : -1)).map(d => `<tr class="table-row border-b"><td class="px-6 py-4">${d.mes}</td><td class="px-6 py-4 font-semibold">${d.categoria}</td><td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${d.tipo === 'Receita' ? 'bg-green-100 text-green-700' : (d.tipo === 'Despesa' ? 'bg-red-100 text-red-700' : (d.tipo === 'Custo' ? 'bg-yellow-100 text-yellow-700' : (d.tipo === 'Dedução' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700')))}">${d.tipo}</span></td><td class="px-6 py-4 text-right font-bold ${d.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}">${d.tipo === 'Receita' ? '+' : '-'} ${formatCurrency(d.valor)}</td></tr>`).join('');
         };
         const updateDebitos = (data) => {
-            const situacaoFilter = document.getElementById('filter-situacao').value;
+            const situacoes = getMultiValues('filter-situacao');
+            const tiposDebito = getMultiValues('filter-tipo-debito');
             const startDate = document.getElementById('start-date-filter').value ? new Date(document.getElementById('start-date-filter').value + 'T00:00:00') : null;
             const endDate = document.getElementById('end-date-filter').value ? new Date(document.getElementById('end-date-filter').value + 'T23:59:59') : null;
-            const filtered = data.filter(d => (!startDate || parseDebitosDate(d.vencimento) >= startDate) && (!endDate || parseDebitosDate(d.vencimento) <= endDate) && (situacaoFilter === 'Todos' || d.situacao === situacaoFilter));
+            const filtered = data.filter(d => (!startDate || parseDebitosDate(d.vencimento) >= startDate) && (!endDate || parseDebitosDate(d.vencimento) <= endDate) && (situacoes.length === 0 || situacoes.includes(d.situacao)) && (tiposDebito.length === 0 || tiposDebito.includes(d.tipo)));
             
             const dividaTotal = data.reduce((sum, item) => sum + item.valor, 0);
             const dividaVencida = data.filter(d => d.situacao === 'Vencido').reduce((sum, item) => sum + item.valor, 0);
@@ -325,20 +337,35 @@
                 updateSidebar();
                 updateAll();
             }));
-            document.querySelectorAll('#filter-mes-conciliacao, #filter-categoria-conciliacao').forEach(el => el.addEventListener('change', updateAll));
-            document.getElementById('clear-filters-conciliacao-btn').addEventListener('click', () => { document.getElementById('filter-mes-conciliacao').value = 'Todos'; document.getElementById('filter-categoria-conciliacao').value = 'Todos'; updateAll(); });
-            document.querySelectorAll('#start-date-filter, #end-date-filter, #filter-situacao').forEach(el => el.addEventListener('change', updateAll));
-            document.getElementById('clear-filters-btn').addEventListener('click', () => { document.getElementById('start-date-filter').value = ''; document.getElementById('end-date-filter').value = ''; document.getElementById('filter-situacao').value = 'Todos'; updateAll(); });
+            document.querySelectorAll('#filter-mes-conciliacao, #filter-categoria-conciliacao, #filter-tipo-conciliacao').forEach(el => el.addEventListener('change', updateAll));
+            document.getElementById('clear-filters-conciliacao-btn').addEventListener('click', () => { const a = document.getElementById('filter-mes-conciliacao'); const b = document.getElementById('filter-categoria-conciliacao'); const c = document.getElementById('filter-tipo-conciliacao'); a.selectedIndex = -1; b.selectedIndex = -1; c.selectedIndex = -1; updateAll(); });
+            document.querySelectorAll('#start-date-filter, #end-date-filter, #filter-situacao, #filter-tipo-debito').forEach(el => el.addEventListener('change', updateAll));
+            document.getElementById('clear-filters-btn').addEventListener('click', () => { document.getElementById('start-date-filter').value = ''; document.getElementById('end-date-filter').value = ''; const s = document.getElementById('filter-situacao'); const t = document.getElementById('filter-tipo-debito'); s.selectedIndex = -1; t.selectedIndex = -1; updateAll(); });
             document.querySelectorAll('#dre-content .table-header th').forEach(th => th.addEventListener('click', () => { const key = th.dataset.sortKeyConc; if (key) { state.dreSort.dir = state.dreSort.key === key && state.dreSort.dir === 'asc' ? 'desc' : 'asc'; state.dreSort.key = key; updateAll(); }}));
             document.querySelectorAll('#debitos-content .table-header th').forEach(th => th.addEventListener('click', () => { const key = th.dataset.sortKey; if (key) { state.debitosSort.dir = state.debitosSort.key === key && state.debitosSort.dir === 'asc' ? 'desc' : 'asc'; state.debitosSort.key = key; updateAll(); }}));
         };
 
         const updateSidebar = () => {
             const data = state.activeTab === 'debitos' ? debitosData : conciliacaoData;
-            const companies = ['Todas', ...new Set(data.map(d => d.empresa))];
+            const companies = [...new Set(data.map(d => d.empresa))];
+            if (state.activeCompanies.size === 0) companies.forEach(c => state.activeCompanies.add(c));
             const filtersContainer = document.getElementById('company-filters');
-            filtersContainer.innerHTML = `<h3 class="text-sm font-semibold text-gray-400 uppercase px-3 mt-4 mb-2">Empresas</h3>` + companies.map(c => `<a href="#" class="sidebar-link flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium ${c === state.activeCompany ? 'active' : ''}" data-company="${c}"><i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i><span>${c === 'Todas' ? 'Visão Geral' : c}</span></a>`).join('');
-            filtersContainer.querySelectorAll('.sidebar-link').forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); state.activeCompany = link.dataset.company; updateAll(); updateSidebar(); }));
+            filtersContainer.innerHTML = `<h3 class="text-sm font-semibold text-gray-400 uppercase px-3 mt-4 mb-2">Empresas</h3>` +
+                `<label class="flex items-center gap-3 px-3 py-2"><input id="toggle-all-companies" type="checkbox" class="w-4 h-4" ${state.activeCompanies.size === companies.length ? 'checked' : ''}/><span class="text-sm font-medium text-gray-700">Selecionar todas</span></label>` +
+                companies.map(c => `<label class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium"><input type="checkbox" class="company-checkbox w-4 h-4" value="${c}" ${state.activeCompanies.has(c) ? 'checked' : ''}/><i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i><span>${c}</span></label>`).join('');
+            const allToggle = document.getElementById('toggle-all-companies');
+            allToggle.addEventListener('change', () => {
+                state.activeCompanies.clear();
+                if (allToggle.checked) companies.forEach(c => state.activeCompanies.add(c));
+                updateAll(); updateSidebar();
+            });
+            filtersContainer.querySelectorAll('.company-checkbox').forEach(cb => cb.addEventListener('change', () => {
+                const name = cb.value;
+                if (cb.checked) state.activeCompanies.add(name); else state.activeCompanies.delete(name);
+                updateAll();
+                const allChecked = companies.every(c => state.activeCompanies.has(c));
+                document.getElementById('toggle-all-companies').checked = allChecked;
+            }));
             lucide.createIcons();
         };
 
@@ -353,9 +380,11 @@
             charts.expensesByType = createChart('expensesByTypeChart', 'doughnut', { datasets: [{ backgroundColor: ['#ef4444', '#f87171', '#fca5a5', '#fecaca'], borderWidth: 4 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } });
             charts.revenueVsExpenses = createChart('revenueVsExpensesChart', 'bar', { datasets: [{ label: 'Receitas', backgroundColor: 'rgba(34, 197, 94, 0.8)', borderRadius: 4 }, { label: 'Despesas', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 4 }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } });
             
-            document.getElementById('filter-situacao').innerHTML = ['Todos', ...new Set(debitosData.map(d => d.situacao))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-mes-conciliacao').innerHTML = ['Todos', ...new Set(conciliacaoData.map(d => d.mes))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-categoria-conciliacao').innerHTML = ['Todos', ...new Set(conciliacaoData.map(d => d.categoria))].map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('filter-situacao').innerHTML = [...new Set(debitosData.map(d => d.situacao))].map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('filter-tipo-debito').innerHTML = [...new Set(debitosData.map(d => d.tipo))].map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('filter-mes-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.mes))].map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('filter-categoria-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.categoria))].map(v => `<option value="${v}">${v}</option>`).join('');
+            document.getElementById('filter-tipo-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.tipo))].map(v => `<option value="${v}">${v}</option>`).join('');
 
             setupEventListeners();
             updateSidebar();
