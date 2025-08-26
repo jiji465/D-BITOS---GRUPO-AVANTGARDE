@@ -246,7 +246,10 @@
         const debitosData = debitosDataRaw.map(d => ({...d, valor: parseCurrency(d.valor), empresa: d.empresa.replace(/ - \(\w+\)/, '').trim() }));
         const conciliacaoData = conciliacaoDataRaw.map(d => {
             const valor = parseCurrency(d.valor);
-            const tipo = d.categoria.includes('RECEITA') ? 'Receita' : 'Despesa';
+            let tipo;
+            if (d.categoria.startsWith('DEDUÇÃO DE RECEITA')) tipo = 'Despesa';
+            else if (d.categoria.includes('RECEITA')) tipo = 'Receita';
+            else tipo = 'Despesa';
             const empresa = d.empresa === 'AGUIAR' ? 'AGUIAR DUARTE SERVICOS MEDICOS LTDA' : (d.empresa === 'CURSOS' ? 'AVANTGARDE CURSOS LTDA' : (d.empresa === 'SPA' ? 'AVANT SPA LTDA' : d.empresa));
             return {...d, valor, tipo, empresa};
         });
