@@ -170,11 +170,11 @@
             </section>
 
             <section class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
-                <div class="chart-card lg:col-span-2 h-[450px]">
+                <div class="chart-card lg:col-span-2">
                     <h3 class="text-lg font-bold text-gray-800 mb-4">Composição da Dívida por Tipo</h3>
                     <canvas id="debtByTypeChart"></canvas>
                 </div>
-                <div class="chart-card lg:col-span-3 h-[450px]">
+                <div class="chart-card lg:col-span-3">
                     <h3 class="text-lg font-bold text-gray-800 mb-4">Débitos por Status e Tipo</h3>
                     <canvas id="debtStatusChart"></canvas>
                 </div>
@@ -296,19 +296,25 @@
                 type: 'doughnut',
                 data: { labels: [], datasets: [] },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { 
-                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 20 }},
+                        legend: { 
+                            position: 'bottom',
+                            align: 'center',
+                            labels: { 
+                                usePointStyle: true, 
+                                boxWidth: 8, 
+                                padding: 10,
+                                font: { size: 11 } 
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
                                     let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += formatCurrency(context.parsed);
-                                    }
+                                    if (label) label += ': ';
+                                    if (context.parsed !== null) label += formatCurrency(context.parsed);
                                     return label;
                                 }
                             }
@@ -323,9 +329,19 @@
                 type: 'bar',
                 data: { labels: ['Vencido', 'A Vencer'], datasets: [] },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { 
-                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, padding: 20 } },
+                        legend: { 
+                            position: 'bottom',
+                            align: 'center',
+                            labels: { 
+                                usePointStyle: true, 
+                                boxWidth: 8, 
+                                padding: 10,
+                                font: { size: 11 }
+                            } 
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
