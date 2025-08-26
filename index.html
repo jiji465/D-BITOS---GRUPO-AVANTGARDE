@@ -37,11 +37,19 @@
         .tab-button { padding: 0.75rem 1rem; font-weight: 600; color: var(--text-secondary); border-bottom: 3px solid transparent; transition: all 0.2s ease; }
         .tab-button:hover { color: var(--text-primary); }
         .tab-button.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .app-header { background-image: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.90)); box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
+        .sidebar label { border-radius: 0.5rem; transition: background-color 0.2s ease, color 0.2s ease; }
+        .sidebar label:hover { background-color: #eff6ff; }
+        .sidebar input[type="checkbox"] { accent-color: var(--primary); }
+        .kpi-card, .chart-card { border: 1px solid var(--border-color); }
+        .kpi-card:hover, .chart-card:hover { box-shadow: 0 16px 36px -12px rgba(0,0,0,0.15); }
+        .filter-bar .filter-input { background-color: #f8fafc; }
+        .filter-bar button { border: 1px solid var(--border-color); }
     </style>
 </head>
 <body class="flex min-h-screen">
 
-    <aside id="sidebar" class="sidebar w-72 text-white flex-shrink-0 p-4 flex flex-col">
+    <aside id="sidebar" class="sidebar w-72 flex-shrink-0 p-4 flex flex-col">
         <div class="flex items-center gap-3 mb-10 px-2">
             <div class="bg-blue-100 p-2 rounded-lg"><i data-lucide="shield-check" class="text-blue-800"></i></div>
             <h2 class="text-xl font-bold text-gray-800">Sete Soluções</h2>
@@ -52,7 +60,7 @@
     </aside>
 
     <div class="flex-1 flex flex-col">
-        <header class="bg-white/95 backdrop-blur-sm border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-20">
+        <header class="app-header backdrop-blur-sm border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-20">
              <h1 id="header-title" class="text-2xl font-bold text-gray-800">Painel Estratégico</h1>
         </header>
         
@@ -99,7 +107,7 @@
                             <button id="clear-filters-conciliacao-btn" class="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" title="Limpar Filtros"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
                         </div>
                     </div>
-                    <div class="table-container bg-white"><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="table-header"><tr><th class="px-6 py-4" data-sort-key-conc="mes"><div class="flex items-center gap-2">Mês <span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key-conc="categoria"><div class="flex items-center gap-2">Categoria <span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key-conc="tipo"><div class="flex items-center gap-2">Tipo <span class="sort-icon"></span></div></th><th class="px-6 py-4 text-right" data-sort-key-conc="valor"><div class="flex items-center justify-end gap-2">Valor <span class="sort-icon"></span></div></th></tr></thead><tbody id="conciliacao-table-body"></tbody></table></div></div>
+                    <div class="table-container bg-white"><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="table-header"><tr class="bg-gray-50"><th class="px-6 py-4" data-sort-key-conc="mes"><div class="flex items-center gap-2">Mês <span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key-conc="categoria"><div class="flex items-center gap-2">Categoria <span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key-conc="tipo"><div class="flex items-center gap-2">Tipo <span class="sort-icon"></span></div></th><th class="px-6 py-4 text-right" data-sort-key-conc="valor"><div class="flex items-center justify-end gap-2">Valor <span class="sort-icon"></span></div></th></tr></thead><tbody id="conciliacao-table-body"></tbody></table></div></div>
                 </section>
             </div>
             
@@ -126,7 +134,7 @@
                             <button id="clear-filters-btn" class="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition" title="Limpar Filtros"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
                         </div>
                     </div>
-                    <div class="table-container bg-white"><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="table-header"><tr><th class="px-6 py-4" data-sort-key="nomeDebito"><div class="flex items-center gap-2">Débito<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="competencia"><div class="flex items-center gap-2">Competência<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="vencimento"><div class="flex items-center gap-2">Vencimento<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="situacao"><div class="flex items-center gap-2">Situação<span class="sort-icon"></span></div></th><th class="px-6 py-4 text-right" data-sort-key="valor"><div class="flex items-center justify-end gap-2">Valor<span class="sort-icon"></span></div></th></tr></thead><tbody id="debt-table-body"></tbody></table></div></div>
+                    <div class="table-container bg-white"><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="table-header"><tr class="bg-gray-50"><th class="px-6 py-4" data-sort-key="nomeDebito"><div class="flex items-center gap-2">Débito<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="competencia"><div class="flex items-center gap-2">Competência<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="vencimento"><div class="flex items-center gap-2">Vencimento<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="situacao"><div class="flex items-center gap-2">Situação<span class="sort-icon"></span></div></th><th class="px-6 py-4 text-right" data-sort-key="valor"><div class="flex items-center justify-end gap-2">Valor<span class="sort-icon"></span></div></th></tr></thead><tbody id="debt-table-body"></tbody></table></div></div>
                 </section>
             </div>
         </main>
@@ -351,8 +359,8 @@
             if (state.activeCompanies.size === 0) companies.forEach(c => state.activeCompanies.add(c));
             const filtersContainer = document.getElementById('company-filters');
             filtersContainer.innerHTML = `<h3 class="text-sm font-semibold text-gray-400 uppercase px-3 mt-4 mb-2">Empresas</h3>` +
-                `<label class="flex items-center gap-3 px-3 py-2"><input id="toggle-all-companies" type="checkbox" class="w-4 h-4" ${state.activeCompanies.size === companies.length ? 'checked' : ''}/><span class="text-sm font-medium text-gray-700">Selecionar todas</span></label>` +
-                companies.map(c => `<label class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium"><input type="checkbox" class="company-checkbox w-4 h-4" value="${c}" ${state.activeCompanies.has(c) ? 'checked' : ''}/><i data-lucide="building-2" class="w-5 h-5 text-gray-500"></i><span>${c}</span></label>`).join('');
+                `<label class="flex items-center gap-3 px-3 py-2"><input id="toggle-all-companies" type="checkbox" class="w-4 h-4" ${state.activeCompanies.size === companies.length ? 'checked' : ''}/><span class="text-sm font-medium text-gray-900">Selecionar todas</span></label>` +
+                companies.map(c => `<label class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-800"><input type="checkbox" class="company-checkbox w-4 h-4" value="${c}" ${state.activeCompanies.has(c) ? 'checked' : ''}/><i data-lucide="building-2" class="w-5 h-5 text-blue-700"></i><span>${c}</span></label>`).join('');
             const allToggle = document.getElementById('toggle-all-companies');
             allToggle.addEventListener('change', () => {
                 state.activeCompanies.clear();
