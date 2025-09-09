@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Estratégico | Sete Soluções</title>
+    <title>Dashboard de Débitos | Sete Soluções</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -18,9 +18,6 @@
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--background); color: var(--text-primary); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
         .sidebar { background-color: var(--card-bg); border-right: 1px solid var(--border-color); }
-        .sidebar-link { transition: all 0.2s ease; color: #4b5563; }
-        .sidebar-link.active, .sidebar-link:hover { background-color: var(--primary); color: #ffffff; transform: translateX(4px); box-shadow: 3px 0 15px -2px rgba(30, 64, 175, 0.3); }
-        .sidebar-link.active i, .sidebar-link:hover i { color: #ffffff !important; }
         .kpi-card { background: var(--card-bg); border-radius: 0.75rem; box-shadow: 0 4px 12px -1px rgba(0,0,0,0.05); transition: all 0.3s ease; border: 1px solid var(--border-color); }
         .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px -3px rgba(0,0,0,0.07); }
         .chart-card { background-color: var(--card-bg); border-radius: 0.75rem; box-shadow: 0 4px 12px -1px rgba(0,0,0,0.05); padding: 1.5rem; border: 1px solid var(--border-color); }
@@ -28,37 +25,25 @@
         .table-header th { background-color: #f9fafb; color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; user-select: none; }
         .table-row:hover { background-color: #f3f4f6; }
         .filter-bar { background-color: #ffffff; padding: 1rem 1.5rem; border-radius: 0.75rem 0.75rem 0 0; border: 1px solid var(--border-color); box-shadow: 0 4px 12px -1px rgba(0,0,0,0.05); }
-        .filter-input-group { position: relative; }
-        .filter-input-group i { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; }
-        .filter-input { padding-left: 2.5rem; background-color: #f9fafb; border: 1px solid var(--border-color); border-radius: 0.5rem; transition: all 0.2s ease; }
+        .filter-input { background-color: #f9fafb; border: 1px solid var(--border-color); border-radius: 0.5rem; transition: all 0.2s ease; }
         .filter-input:focus { background-color: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2); outline: none; }
         .sort-icon { opacity: 0.4; transition: all 0.2s ease-in-out; }
         .sort-icon.active { opacity: 1; color: var(--primary); }
-        .tab-button { padding: 0.75rem 1rem; font-weight: 600; color: var(--text-secondary); border-bottom: 3px solid transparent; transition: all 0.2s ease; }
-        .tab-button:hover { color: var(--text-primary); }
         .tab-button.active { color: var(--primary); border-bottom-color: var(--primary); }
         .app-header { background-image: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.90)); box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
         .sidebar label { border-radius: 0.5rem; transition: background-color 0.2s ease, color 0.2s ease; }
         .sidebar label:hover { background-color: #eff6ff; }
         .sidebar input[type="checkbox"] { accent-color: var(--primary); }
-        .kpi-card, .chart-card { border: 1px solid var(--border-color); }
-        .kpi-card:hover, .chart-card:hover { box-shadow: 0 16px 36px -12px rgba(0,0,0,0.15); }
-        .filter-bar .filter-input { background-color: #f8fafc; }
-        .filter-bar button { border: 1px solid var(--border-color); }
         .filter-grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 0.75rem; align-items: end; }
         .filter-field { grid-column: span 4 / span 4; min-width: 200px; }
-        .filter-field.wide { grid-column: span 6 / span 6; }
         .filter-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: .04em; }
         .filter-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.25rem; height: 1.25rem; padding: 0 0.35rem; border-radius: 9999px; background: #e5edff; color: #1e40af; font-size: 0.7rem; font-weight: 700; }
-        .filter-actions { grid-column: span 2 / span 2; display: flex; gap: 0.5rem; justify-content: flex-end; }
+        .filter-actions { grid-column: span 4 / span 4; display: flex; gap: 0.5rem; justify-content: flex-end; }
         .loading { opacity: 0.6; pointer-events: none; }
         .tooltip { position: relative; }
         .tooltip:hover::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; white-space: nowrap; z-index: 50; }
         .export-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; }
         .export-btn:hover { background: linear-gradient(135deg, #059669, #047857); }
-        .kpi-trend { font-size: 0.875rem; margin-top: 0.25rem; }
-        .kpi-trend.positive { color: #10b981; }
-        .kpi-trend.negative { color: #ef4444; }
         .table-row:nth-child(even) { background-color: #f9fafb; }
         .table-row:nth-child(odd) { background-color: #ffffff; }
         .notification { position: fixed; top: 1rem; right: 1rem; padding: 1rem; border-radius: 0.5rem; color: white; z-index: 1000; transform: translateX(100%); transition: transform 0.3s ease; }
@@ -81,7 +66,7 @@
 
     <div class="flex-1 flex flex-col">
         <header class="app-header backdrop-blur-sm border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-20">
-             <h1 id="header-title" class="text-2xl font-bold text-gray-800">Painel Estratégico</h1>
+             <h1 id="header-title" class="text-2xl font-bold text-gray-800">Débitos Fiscais</h1>
              <div class="flex items-center gap-3">
                  <button id="export-btn" class="export-btn px-4 py-2 rounded-lg font-medium transition-all duration-200 tooltip" data-tooltip="Exportar dados filtrados">
                      <i data-lucide="download" class="w-4 h-4 mr-2"></i>Exportar
@@ -94,63 +79,12 @@
         
         <div class="px-8 border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-[73px] z-10">
             <nav class="flex gap-4">
-                <button class="tab-button active" data-tab="geral">Painel Estratégico</button>
-                <button class="tab-button" data-tab="dre">Análise DRE</button>
-                <button class="tab-button" data-tab="debitos">Débitos Fiscais</button>
+                <button class="tab-button active" data-tab="debitos">Débitos Fiscais</button>
             </nav>
         </div>
 
         <main class="flex-1 p-8">
-            <div id="geral-content" class="tab-content">
-                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Receita Total</h3><div class="bg-green-100 p-2 rounded-md"><i data-lucide="arrow-up-circle" class="text-green-600"></i></div></div><p id="geral-kpi-receita" class="text-3xl font-bold text-green-600 mt-2">R$ 0,00</p></div>
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Despesa Total</h3><div class="bg-red-100 p-2 rounded-md"><i data-lucide="arrow-down-circle" class="text-red-600"></i></div></div><p id="geral-kpi-despesa" class="text-3xl font-bold text-red-600 mt-2">R$ 0,00</p></div>
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Resultado Líquido</h3><div class="bg-blue-100 p-2 rounded-md"><i data-lucide="scale" class="text-blue-600"></i></div></div><p id="geral-kpi-resultado" class="text-3xl font-bold text-blue-800 mt-2">R$ 0,00</p></div>
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Total</h3><div class="bg-orange-100 p-2 rounded-md"><i data-lucide="landmark" class="text-orange-600"></i></div></div><p id="geral-kpi-divida" class="text-3xl font-bold text-orange-600 mt-2">R$ 0,00</p></div>
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Vencida</h3><div class="bg-red-100 p-2 rounded-md"><i data-lucide="alert-circle" class="text-red-600"></i></div></div><p id="geral-kpi-vencida" class="text-3xl font-bold text-red-600 mt-2">R$ 0,00</p></div>
-                </section>
-                <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div class="chart-card flex flex-col"><h3 class="text-lg font-bold text-gray-800 mb-4">Resultado Líquido por Empresa</h3><div class="relative h-96"><canvas id="geral-resultado-empresa-chart"></canvas></div></div>
-                    <div class="chart-card flex flex-col"><h3 class="text-lg font-bold text-gray-800 mb-4">Dívida Total por Empresa</h3><div class="relative h-96"><canvas id="geral-divida-empresa-chart"></canvas></div></div>
-                </section>
-            </div>
-            
-            <div id="dre-content" class="tab-content hidden">
-                 <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Total de Receitas</h3><div class="bg-green-100 p-2 rounded-md"><i data-lucide="arrow-up-circle" class="text-green-600"></i></div></div><p id="kpi-receitas" class="text-4xl font-bold text-green-600 mt-2">R$ 0,00</p></div>
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Total de Despesas</h3><div class="bg-red-100 p-2 rounded-md"><i data-lucide="arrow-down-circle" class="text-red-600"></i></div></div><p id="kpi-despesas" class="text-4xl font-bold text-red-600 mt-2">R$ 0,00</p></div>
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Resultado Líquido</h3><div class="bg-blue-100 p-2 rounded-md"><i data-lucide="scale" class="text-blue-600"></i></div></div><p id="kpi-resultado" class="text-4xl font-bold text-blue-800 mt-2">R$ 0,00</p></div>
-                </section>
-                 <section class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
-                    <div class="chart-card lg:col-span-2 flex flex-col"><h3 class="text-lg font-bold text-gray-800 mb-4">Composição das Despesas</h3><div class="relative h-96"><canvas id="expensesByTypeChart"></canvas></div></div>
-                    <div class="chart-card lg:col-span-3 flex flex-col"><h3 class="text-lg font-bold text-gray-800 mb-4">Receitas vs. Despesas por Mês</h3><div class="relative h-96"><canvas id="revenueVsExpensesChart"></canvas></div></div>
-                </section>
-                <section>
-                    <div class="filter-bar">
-                        <div class="flex items-center justify-between mb-3"><h3 class="text-xl font-bold text-gray-800">Lançamentos</h3></div>
-                        <div class="filter-grid">
-                            <div class="filter-field">
-                                <label class="filter-label"><i data-lucide="calendar-days" class="w-4 h-4"></i> Mês <span id="badge-mes" class="filter-badge">0</span></label>
-                                <select id="filter-mes-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2 tooltip" data-tooltip="Selecione um ou mais meses para filtrar"></select>
-                            </div>
-                            <div class="filter-field wide">
-                                <label class="filter-label"><i data-lucide="filter" class="w-4 h-4"></i> Categoria <span id="badge-categoria" class="filter-badge">0</span></label>
-                                <select id="filter-categoria-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2 tooltip" data-tooltip="Selecione uma ou mais categorias"></select>
-                            </div>
-                            <div class="filter-field">
-                                <label class="filter-label"><i data-lucide="layers" class="w-4 h-4"></i> Tipo <span id="badge-tipo" class="filter-badge">0</span></label>
-                                <select id="filter-tipo-conciliacao" multiple class="filter-input text-gray-900 text-sm font-medium block w-full p-2 tooltip" data-tooltip="Filtrar por Receita ou Despesa"></select>
-                            </div>
-                            <div class="filter-actions">
-                                <button id="clear-filters-conciliacao-btn" class="px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition tooltip" data-tooltip="Limpar todos os filtros aplicados">Limpar</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="table-container bg-white"><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="table-header"><tr class="bg-gray-50"><th class="px-6 py-4" data-sort-key-conc="mes"><div class="flex items-center gap-2">Mês <span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key-conc="categoria"><div class="flex items-center gap-2">Categoria <span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key-conc="tipo"><div class="flex items-center gap-2">Tipo <span class="sort-icon"></span></div></th><th class="px-6 py-4 text-right" data-sort-key-conc="valor"><div class="flex items-center justify-end gap-2">Valor <span class="sort-icon"></span></div></th></tr></thead><tbody id="conciliacao-table-body"></tbody></table></div></div>
-                </section>
-            </div>
-            
-            <div id="debitos-content" class="tab-content hidden">
+            <div id="debitos-content" class="tab-content">
                 <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Total</h3><div class="bg-orange-100 p-2 rounded-md"><i data-lucide="landmark" class="text-orange-600"></i></div></div><p id="kpi-total" class="text-4xl font-bold text-orange-600 mt-2">R$ 0,00</p></div>
                     <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Vencida</h3><div class="bg-red-100 p-2 rounded-md"><i data-lucide="alert-circle" class="text-red-600"></i></div></div><p id="kpi-vencido" class="text-4xl font-bold text-red-600 mt-2">R$ 0,00</p></div>
@@ -166,22 +100,18 @@
                         <div class="flex items-center justify-between mb-3"><h3 class="text-xl font-bold text-gray-800">Detalhamento dos Débitos</h3></div>
                         <div class="filter-grid">
                             <div class="filter-field">
-                                <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Início</label>
-                                <input type="date" id="start-date-filter" class="filter-input p-2 w-full tooltip" data-tooltip="Data inicial para filtrar débitos">
+                                <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Início Venc.</label>
+                                <input type="date" id="start-date-filter" class="filter-input p-2 w-full tooltip" data-tooltip="Data de vencimento inicial para filtrar débitos">
                             </div>
                             <div class="filter-field">
-                                <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Fim</label>
-                                <input type="date" id="end-date-filter" class="filter-input p-2 w-full tooltip" data-tooltip="Data final para filtrar débitos">
+                                <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Fim Venc.</label>
+                                <input type="date" id="end-date-filter" class="filter-input p-2 w-full tooltip" data-tooltip="Data de vencimento final para filtrar débitos">
                             </div>
                             <div class="filter-field">
                                 <label class="filter-label"><i data-lucide="filter" class="w-4 h-4"></i> Situação <span id="badge-situacao" class="filter-badge">0</span></label>
                                 <select id="filter-situacao" multiple class="filter-input p-2 w-full tooltip" data-tooltip="Selecione uma ou mais situações"></select>
                             </div>
-                            <div class="filter-field">
-                                <label class="filter-label"><i data-lucide="list-tree" class="w-4 h-4"></i> Tipo <span id="badge-tipo-debito" class="filter-badge">0</span></label>
-                                <select id="filter-tipo-debito" multiple class="filter-input p-2 w-full tooltip" data-tooltip="Selecione um ou mais tipos de débito"></select>
-                            </div>
-                            <div class="filter-actions">
+                             <div class="filter-actions">
                                 <button id="clear-filters-btn" class="px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition tooltip" data-tooltip="Limpar todos os filtros aplicados">Limpar</button>
                             </div>
                         </div>
@@ -197,293 +127,81 @@
         // BASE DE DADOS
         // =================================================================================
         const debitosDataRaw = [
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 'R$ 6.265,54', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 23.961,42', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '1º trimestre', vencimento: '30/05/2025', valor: 'R$ 3.277,25', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 'R$ 3.245,93', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 9.455,58', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'Contribuições previdenciárias e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 'R$ 8.299,40', situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 22.085,27', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 8.715,21', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 22.085,27', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 8.715,21', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'ISS (DIVIDA ATIVA)', competencia: '03/2022', vencimento: '18/04/2022', valor: 'R$ 4.023,42', situacao: 'Vencido', tipo: 'ISS' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 'R$ 2.122,03', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 'R$ 1.837,79', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'Contribuições previdenciárias e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 'R$ 3.254,87', situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 9.985,35', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 4.383,71', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 9.203,49', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 4.040,45', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 9.203,49', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 4.040,45', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'PIS', competencia: '03/2025', vencimento: '25/04/2025', valor: 'R$ 132,76', situacao: 'Vencido', tipo: 'PIS/COFINS' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'COFINS', competencia: '03/2025', vencimento: '25/04/2025', valor: 'R$ 612,78', situacao: 'Vencido', tipo: 'PIS/COFINS' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'Contribuições previdenciárias e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 'R$ 4.588,75', situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 34.014,45', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 13.223,20', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 31.351,16', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 12.187,84', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 31.351,16', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 12.187,84', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'ISS', competencia: '05/2025', vencimento: '10/06/2025', valor: 'R$ 52.267,14', situacao: 'Vencido', tipo: 'ISS' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'ISS', competencia: '06/2025', vencimento: '10/07/2025', valor: 'R$ 195,67', situacao: 'Vencido', tipo: 'ISS' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'COFINS', competencia: '03/2025', vencimento: '25/04/2025', valor: 'R$ 27.170,99', situacao: 'Vencido', tipo: 'PIS/COFINS' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 'R$ 30.121,35', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'Contribuições previdenciárias e federais da folha', competencia: '06/2025', vencimento: '18/07/2025', valor: 'R$ 14.756,70', situacao: 'Vencido', tipo: 'Contribuições' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 'R$ 21.297,62', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'CSLL DEMAIS (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 'R$ 9.732,62', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 19.630,02', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'CSLL DEMAIS (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 8.970,55', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ LUCRO PRESUMIDO (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 19.630,02', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'CSLL DEMAIS (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 8.970,55', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'Parcelamento 11/34', competencia: '06/2025', vencimento: '30/06/2025', valor: 'R$ 576,43', situacao: 'Vencido', tipo: 'Parcelamento' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'Parcelamento 12/34', competencia: '07/2025', vencimento: '31/07/2025', valor: 'R$ 576,43', situacao: 'Vencido', tipo: 'Parcelamento' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'Parcelamento 13/34', competencia: '08/2025', vencimento: '29/08/2025', valor: 'R$ 576,43', situacao: 'A vencer', tipo: 'Parcelamento' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'ISS', competencia: '04/2024', vencimento: '10/05/2024', valor: 'R$ 1.053,49', situacao: 'Vencido', tipo: 'ISS' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 'R$ 6.384,93', situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 25.225,31', situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 22.988,35', situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '1º trimestre', vencimento: '30/05/2025', valor: 'R$ 3.307,78', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 'R$ 3.307,78', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 9.954,34', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'ISS (DIVIDA ATIVA)', competencia: '03/2022', vencimento: '18/04/2022', valor: 'R$ 4.055,42', situacao: 'Vencido', tipo: 'ISS' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 9.071,58', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 22.338,92', situacao: 'A vencer', tipo: 'IRPJ' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'ISS', competencia: '08/2025', vencimento: '15/09/2025', valor: 'R$ 7.288,53', situacao: 'A vencer', tipo: 'ISS' },
+            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 8.815,31', situacao: 'A vencer', tipo: 'CSLL' },
+            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 'R$ 10.512,04', situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 9.579,82', situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 4.614,94', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 4.205,66', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 9.309,19', situacao: 'A vencer', tipo: 'IRPJ' },
+            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 4.086,85', situacao: 'A vencer', tipo: 'CSLL' },
+            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'ISS', competencia: '08/2025', vencimento: '15/09/2025', valor: 'R$ 1.608,51', situacao: 'A vencer', tipo: 'ISS' },
+            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'Parcelamento ISS (R$ 62.692,22)', competencia: '01/12 parcelas', vencimento: '15/09/2025', valor: 'R$ 5.224,35', situacao: 'A vencer', tipo: 'Parcelamento' },
+            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 35.808,62', situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 32.633,15', situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 13.920,68', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 12.686,21', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 31.711,24', situacao: 'A vencer', tipo: 'IRPJ' },
+            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 12.327,82', situacao: 'A vencer', tipo: 'CSLL' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 22.421,01', situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 20.432,71', situacao: 'Vencido', tipo: 'IRPJ' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 10.245,99', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 9.337,36', situacao: 'Vencido', tipo: 'CSLL' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 19.855,48', situacao: 'A vencer', tipo: 'IRPJ' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 9.073,58', situacao: 'A vencer', tipo: 'CSLL' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'Parcelamento (Salvdo Devedor R$ 48.465,67)', competencia: '14/34 parcelas', vencimento: '30/09/2025', valor: 'R$ 9.693,13', situacao: 'A vencer', tipo: 'Parcelamento' },
+            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'Parcelamento (Salvdo Devedor R$ 12.230,84)', competencia: '02/6 parcelas', vencimento: '30/09/2025', valor: 'R$ 582,40', situacao: 'A vencer', tipo: 'Parcelamento' }
         ];
-        const conciliacaoDataRaw = [
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 16.739,27" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 5.193,52" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 5.000,00" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 12.730,11" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA FINANCEIRA", valor: "R$ 20.005,00" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA OPERACIONAL", valor: "R$ 1.997,26" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 10.465,71" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "EMPRÉSTIMO", valor: "R$ 4.086,01" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 12.802,63" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 145.682,99" },
-            { empresa: "AVANT SPA LTDA", mes: "Maio", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 29.308,50" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 31.638,50" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 6.432,10" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 55.000,00" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 11.601,73" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 111,00" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA OPERACIONAL", valor: "R$ 809,55" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 10.324,54" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "EMPRÉSTIMO", valor: "R$ 4.085,20" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 7.859,09" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 108.662,02" },
-            { empresa: "AVANT SPA LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 59.000,00" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 33.032,60" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 12.144,86" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 10.000,00" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 15.347,19" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA OPERACIONAL", valor: "R$ 2.510,50" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 10.251,77" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "EMPRÉSTIMO", valor: "R$ 4.084,39" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 6.267,26" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 204.200,72" },
-            { empresa: "AVANT SPA LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 104.800,00" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 6.855,38" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 6.660,00" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 14.369,77" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 103.153,50" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 18.724,75" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 27.000,00" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "EMPRÉSTIMO", valor: "R$ 6.414,50" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 25.205,28" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 223.054,63" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 32.945,24" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 1.691,50" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 22.944,24" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 50.739,88" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 111,00" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 17.334,84" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 45.000,00" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "EMPRÉSTIMO", valor: "R$ 6.413,32" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 17.885,50" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "OUTRAS RECEITAS", valor: "R$ 19.000,00" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 235.209,81" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 75.000,00" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 84.382,72" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 12.140,10" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 58.201,66" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 36.391,42" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 18.920,38" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 104.000,00" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "EMPRÉSTIMO", valor: "R$ 6.412,10" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "ESTORNO DE PAGAMENTO", valor: "R$ 750,00" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 17.764,12" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 301.417,26" },
-            { empresa: "AGUIAR DUARTE SERVICOS MEDICOS LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 63.900,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 6.237,27" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 80.560,51" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 50.199,86" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA FINANCEIRA", valor: "R$ 105,43" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 11.699,48" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DESPESAS COMERCIAIS", valor: "R$ 10.527,60" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 128.000,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 14.834,04" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 331.720,84" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Maio", categoria: "EMPRÉSTIMO", valor: "R$ 10.888,09" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 27.690,27" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 123.476,14" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 54.605,24" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 56,82" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 500,90" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 11.050,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 10.000,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 38.810,42" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "OUTRAS RECEITAS", valor: "R$ 32.000,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 265.970,49" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 17.000,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Junho", categoria: "EMPRÉSTIMO", valor: "R$ 11.348,62" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 28.290,28" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 6.875,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 137.165,53" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 42.919,86" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA FINANCEIRA", valor: "R$ 142,88" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 6.459,95" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 24.908,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 103.000,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 952,89" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 472.575,55" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 134.300,00" },
-            { empresa: "AVANTGARDE CURSOS LTDA", mes: "Julho", categoria: "EMPRÉSTIMO", valor: "R$ 10.901,30" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 26.927,17" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 134.216,40" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 29.189,82" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 106.507,57" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA COM PESSOAL", valor: "R$ 59.409,93" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA FINANCEIRA", valor: "R$ 143,10" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESA PREDIAL", valor: "R$ 30.933,71" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DESPESAS COMERCIAIS", valor: "R$ 16.000,00" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 78.146,37" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 42.729,36" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "RECEITA DE VENDAS", valor: "R$ 584.851,96" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Maio", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 8.000,00" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESA COM PESSOAL", valor: "R$ 89.168,92" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 101.916,15" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 11.020,22" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 81.641,54" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESA FINANCEIRA", valor: "R$ 131,10" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESA PREDIAL", valor: "R$ 20.933,30" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 13.000,00" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 40.000,00" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 69.693,58" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "OUTRAS RECEITAS", valor: "R$ 23.000,00" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "RECEITA DE VENDAS", valor: "R$ 521.349,45" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Junho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 161.500,00" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESA COM PESSOAL", valor: "R$ 67.800,74" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "CUSTO DOS SERVIÇOS PRESTADOS", valor: "R$ 186.686,54" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DEDUÇÃO DE RECEITA BRUTA - ESTORNOS", valor: "R$ 38.511,28" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESA ADMINISTRATIVA", valor: "R$ 79.249,39" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESA FINANCEIRA", valor: "R$ 131,10" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESA PREDIAL", valor: "R$ 23.256,29" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DESPESAS COMERCIAIS", valor: "R$ 15.599,11" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "DISTRIBUIÇÃO DE LUCROS", valor: "R$ 99.546,37" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "IMPOSTO SOBRE VENDAS", valor: "R$ 21.320,34" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "RECEITA DE VENDAS", valor: "R$ 695.134,74" },
-            { empresa: "INSTITUTO DE FISIOLOGIA HUMANA LTDA", mes: "Julho", categoria: "TRANSFERENCIA ENTRE CONTAS", valor: "R$ 167.000,00" }
-        ];
+
         // =================================================================================
         // LÓGICA DO DASHBOARD
         // =================================================================================
-        const state = { activeCompanies: new Set(), activeTab: 'geral', debitosSort: { key: 'vencimento', dir: 'asc' }, dreSort: { key: 'valor', dir: 'desc' } };
+        const state = { activeCompanies: new Set(), debitosSort: { key: 'vencimento', dir: 'asc' } };
         const charts = {};
         const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
         const parseCurrency = (str) => typeof str === 'string' ? parseFloat(str.replace(/[^0-9,-]+/g,"").replace(/\./g,'').replace(',', '.')) : str;
         const parseDebitosDate = (d) => { const [day, month, year] = d.split('/'); return new Date(year, month - 1, day); };
         const getMultiValues = (selectId) => { const el = document.getElementById(selectId); return Array.from(el.selectedOptions).map(o => o.value); };
+        
         const updateFilterBadges = () => {
             const safeLen = (id) => { const el = document.getElementById(id); return el ? Array.from(el.selectedOptions).length : 0; };
             const setBadge = (badgeId, value) => { const b = document.getElementById(badgeId); if (b) b.textContent = value; };
-            setBadge('badge-mes', safeLen('filter-mes-conciliacao'));
-            setBadge('badge-categoria', safeLen('filter-categoria-conciliacao'));
-            setBadge('badge-tipo', safeLen('filter-tipo-conciliacao'));
             setBadge('badge-situacao', safeLen('filter-situacao'));
-            setBadge('badge-tipo-debito', safeLen('filter-tipo-debito'));
         };
+
         const debitosData = debitosDataRaw.map(d => ({...d, valor: parseCurrency(d.valor), empresa: d.empresa.replace(/ - \(\w+\)/, '').trim() }));
-        const conciliacaoData = conciliacaoDataRaw.map(d => {
-            const valor = parseCurrency(d.valor);
-            let tipo;
-            if (d.categoria.startsWith('DEDUÇÃO DE RECEITA')) tipo = 'Despesa';
-            else if (d.categoria.includes('RECEITA')) tipo = 'Receita';
-            else tipo = 'Despesa';
-            const empresa = d.empresa === 'AGUIAR' ? 'AGUIAR DUARTE SERVICOS MEDICOS LTDA' : (d.empresa === 'CURSOS' ? 'AVANTGARDE CURSOS LTDA' : (d.empresa === 'SPA' ? 'AVANT SPA LTDA' : d.empresa));
-            return {...d, valor, tipo, empresa};
-        });
+
         const updateAll = () => {
-            const selectedCompanies = state.activeCompanies;
-            const companyFilter = (d) => selectedCompanies.size === 0 || selectedCompanies.has(d.empresa);
+            const companyFilter = (d) => state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa);
             const debitos = debitosData.filter(companyFilter);
-            const dre = conciliacaoData.filter(companyFilter);
-            updateGeral(debitos, dre);
-            updateDRE(dre);
             updateDebitos(debitos);
             updateFilterBadges();
         };
-        const updateGeral = (debitos, dre) => {
-            const filteredDebitos = debitos.filter(d => state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa));
-            const filteredDre = dre.filter(d => state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa));
-            const totalDebitos = filteredDebitos.reduce((sum, d) => sum + d.valor, 0);
-            const totalReceitas = filteredDre.filter(d => d.tipo === 'Receita').reduce((sum, d) => sum + d.valor, 0);
-            const totalDespesas = filteredDre.filter(d => d.tipo === 'Despesa').reduce((sum, d) => sum + d.valor, 0);
-            const resultadoLiquido = totalReceitas - totalDespesas;
-            const empresasCount = state.activeCompanies.size || filteredDre.length > 0 ? [...new Set(filteredDre.map(d => d.empresa))].length : 0;
-            const debitosCount = filteredDebitos.length;
-            
-            document.getElementById('geral-kpi-receita').textContent = formatCurrency(totalReceitas);
-            document.getElementById('geral-kpi-despesa').textContent = formatCurrency(totalDespesas);
-            document.getElementById('geral-kpi-resultado').textContent = formatCurrency(resultadoLiquido);
-            document.getElementById('geral-kpi-divida').textContent = formatCurrency(totalDebitos);
-            
-            const dividaVencida = filteredDebitos.filter(d => d.situacao === 'Vencido').reduce((sum, d) => sum + d.valor, 0);
-            document.getElementById('geral-kpi-vencida').textContent = formatCurrency(dividaVencida);
-            
-            updateGeralCharts(filteredDebitos, filteredDre);
-        };
-        const updateDRE = (data) => {
-            const meses = getMultiValues('filter-mes-conciliacao');
-            const categorias = getMultiValues('filter-categoria-conciliacao');
-            const tipos = getMultiValues('filter-tipo-conciliacao');
-            const filtered = data.filter(d => (meses.length === 0 || meses.includes(d.mes)) && (categorias.length === 0 || categorias.includes(d.categoria)) && (tipos.length === 0 || tipos.includes(d.tipo)));
-            const totalReceitas = filtered.filter(d => d.tipo === 'Receita').reduce((sum, i) => sum + i.valor, 0);
-            const totalDespesas = filtered.filter(d => d.tipo === 'Despesa').reduce((sum, i) => sum + i.valor, 0);
-            document.getElementById('kpi-receitas').textContent = formatCurrency(totalReceitas);
-            document.getElementById('kpi-despesas').textContent = formatCurrency(totalDespesas);
-            document.getElementById('kpi-resultado').textContent = formatCurrency(totalReceitas - totalDespesas);
 
-            const expensesByType = filtered.filter(d => d.tipo === 'Despesa').reduce((acc, d) => { acc[d.categoria] = (acc[d.categoria] || 0) + d.valor; return acc; }, {});
-            charts.expensesByType.data.labels = Object.keys(expensesByType);
-            charts.expensesByType.data.datasets[0].data = Object.values(expensesByType);
-            charts.expensesByType.update();
-
-            const monthlySummary = filtered.reduce((acc, d) => {
-                if (!acc[d.mes]) acc[d.mes] = { receitas: 0, despesas: 0 };
-                if (d.tipo === 'Receita') acc[d.mes].receitas += d.valor;
-                if (d.tipo === 'Despesa') acc[d.mes].despesas += d.valor;
-                return acc;
-            }, {});
-            const monthOrder = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-            const months = Object.keys(monthlySummary).sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b));
-            charts.revenueVsExpenses.data.labels = months;
-            charts.revenueVsExpenses.data.datasets[0].data = months.map(m => monthlySummary[m].receitas);
-            charts.revenueVsExpenses.data.datasets[1].data = months.map(m => monthlySummary[m].despesas);
-            charts.revenueVsExpenses.update();
-
-            const tableBody = document.getElementById('conciliacao-table-body');
-            tableBody.innerHTML = filtered.sort((a,b) => {
-                const key = state.dreSort.key;
-                let aVal = a[key];
-                let bVal = b[key];
-                if (key === 'valor') { aVal = a.valor; bVal = b.valor; }
-                if (aVal > bVal) return state.dreSort.dir === 'asc' ? 1 : -1;
-                if (aVal < bVal) return state.dreSort.dir === 'asc' ? -1 : 1;
-                return 0;
-            }).map(d => `<tr class="table-row border-b"><td class="px-6 py-4">${d.mes}</td><td class="px-6 py-4 font-semibold">${d.categoria}</td><td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${d.tipo === 'Receita' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${d.tipo}</span></td><td class="px-6 py-4 text-right font-bold ${d.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}">${d.tipo === 'Receita' ? '+' : '-'} ${formatCurrency(d.valor)}</td></tr>`).join('');
-        };
         const updateDebitos = (data) => {
             const situacoes = getMultiValues('filter-situacao');
-            const tiposDebito = getMultiValues('filter-tipo-debito');
             const startDate = document.getElementById('start-date-filter').value ? new Date(document.getElementById('start-date-filter').value + 'T00:00:00') : null;
             const endDate = document.getElementById('end-date-filter').value ? new Date(document.getElementById('end-date-filter').value + 'T23:59:59') : null;
-            const filtered = data.filter(d => (!startDate || parseDebitosDate(d.vencimento) >= startDate) && (!endDate || parseDebitosDate(d.vencimento) <= endDate) && (situacoes.length === 0 || situacoes.includes(d.situacao)) && (tiposDebito.length === 0 || tiposDebito.includes(d.tipo)));
-            const dividaTotal = data.reduce((sum, item) => sum + item.valor, 0);
-            const dividaVencida = data.filter(d => d.situacao === 'Vencido').reduce((sum, item) => sum + item.valor, 0);
+            
+            const filtered = data.filter(d => 
+                (!startDate || parseDebitosDate(d.vencimento) >= startDate) && 
+                (!endDate || parseDebitosDate(d.vencimento) <= endDate) && 
+                (situacoes.length === 0 || situacoes.includes(d.situacao))
+            );
+
+            const dividaTotal = filtered.reduce((sum, item) => sum + item.valor, 0);
+            const dividaVencida = filtered.filter(d => d.situacao === 'Vencido').reduce((sum, item) => sum + item.valor, 0);
             const dividaAVencer = dividaTotal - dividaVencida;
+
             document.getElementById('kpi-total').textContent = formatCurrency(dividaTotal);
             document.getElementById('kpi-vencido').textContent = formatCurrency(dividaVencida);
             document.getElementById('kpi-avencer').textContent = formatCurrency(dividaAVencer);
@@ -494,7 +212,7 @@
             charts.debtByType.data.datasets[0].data = Object.values(byType);
             charts.debtByType.update();
 
-            const byCompany = data.reduce((acc, { empresa, situacao, valor }) => {
+            const byCompany = filtered.reduce((acc, { empresa, situacao, valor }) => {
                 if (!acc[empresa]) acc[empresa] = { vencido: 0, aVencer: 0 };
                 if (situacao === 'Vencido') acc[empresa].vencido += valor; else acc[empresa].aVencer += valor;
                 return acc;
@@ -519,55 +237,56 @@
         };
         
         const setupEventListeners = () => {
-            document.querySelectorAll('.tab-button').forEach(b => b.addEventListener('click', () => {
-                state.activeTab = b.dataset.tab;
-                document.getElementById('header-title').textContent = b.textContent;
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                b.classList.add('active');
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('hidden', c.id !== `${state.activeTab}-content`));
-                updateSidebar();
-                updateAll();
+            document.querySelectorAll('#start-date-filter, #end-date-filter, #filter-situacao').forEach(el => el.addEventListener('change', () => { updateAll(); }));
+            document.getElementById('clear-filters-btn').addEventListener('click', () => { 
+                document.getElementById('start-date-filter').value = ''; 
+                document.getElementById('end-date-filter').value = ''; 
+                document.getElementById('filter-situacao').selectedIndex = -1;
+                updateAll(); 
+            });
+            document.querySelectorAll('#debitos-content .table-header th').forEach(th => th.addEventListener('click', () => { 
+                const key = th.dataset.sortKey; 
+                if (key) { 
+                    state.debitosSort.dir = state.debitosSort.key === key && state.debitosSort.dir === 'asc' ? 'desc' : 'asc'; 
+                    state.debitosSort.key = key; 
+                    updateAll(); 
+                }
             }));
-            document.querySelectorAll('#filter-mes-conciliacao, #filter-categoria-conciliacao, #filter-tipo-conciliacao').forEach(el => el.addEventListener('change', () => { updateAll(); }));
-            document.getElementById('clear-filters-conciliacao-btn').addEventListener('click', () => { const a = document.getElementById('filter-mes-conciliacao'); const b = document.getElementById('filter-categoria-conciliacao'); const c = document.getElementById('filter-tipo-conciliacao'); a.selectedIndex = -1; b.selectedIndex = -1; c.selectedIndex = -1; updateAll(); });
-            document.querySelectorAll('#start-date-filter, #end-date-filter, #filter-situacao, #filter-tipo-debito').forEach(el => el.addEventListener('change', () => { updateAll(); }));
-            document.getElementById('clear-filters-btn').addEventListener('click', () => { document.getElementById('start-date-filter').value = ''; document.getElementById('end-date-filter').value = ''; const s = document.getElementById('filter-situacao'); const t = document.getElementById('filter-tipo-debito'); s.selectedIndex = -1; t.selectedIndex = -1; updateAll(); });
-            document.querySelectorAll('#dre-content .table-header th').forEach(th => th.addEventListener('click', () => { const key = th.dataset.sortKeyConc; if (key) { state.dreSort.dir = state.dreSort.key === key && state.dreSort.dir === 'asc' ? 'desc' : 'asc'; state.dreSort.key = key; updateAll(); }}));
-            document.querySelectorAll('#debitos-content .table-header th').forEach(th => th.addEventListener('click', () => { const key = th.dataset.sortKey; if (key) { state.debitosSort.dir = state.debitosSort.key === key && state.debitosSort.dir === 'asc' ? 'desc' : 'asc'; state.debitosSort.key = key; updateAll(); }}));
         };
 
         const updateSidebar = () => {
-            const data = state.activeTab === 'debitos' ? debitosData : conciliacaoData;
-            const companies = [...new Set(data.map(d => d.empresa))];
+            const companies = [...new Set(debitosData.map(d => d.empresa))];
             if (state.activeCompanies.size === 0) companies.forEach(c => state.activeCompanies.add(c));
+            
             const filtersContainer = document.getElementById('company-filters');
             filtersContainer.innerHTML = `<h3 class="text-sm font-semibold text-gray-400 uppercase px-3 mt-4 mb-2">Empresas</h3>` +
                 `<label class="flex items-center gap-3 px-3 py-2"><input id="toggle-all-companies" type="checkbox" class="w-4 h-4" ${state.activeCompanies.size === companies.length ? 'checked' : ''}/><span class="text-sm font-medium text-gray-900">Selecionar todas</span></label>` +
                 companies.map(c => `<label class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-800"><input type="checkbox" class="company-checkbox w-4 h-4" value="${c}" ${state.activeCompanies.has(c) ? 'checked' : ''}/><i data-lucide="building-2" class="w-5 h-5 text-blue-700"></i><span>${c}</span></label>`).join('');
+            
             const allToggle = document.getElementById('toggle-all-companies');
             allToggle.addEventListener('change', () => {
                 state.activeCompanies.clear();
                 if (allToggle.checked) companies.forEach(c => state.activeCompanies.add(c));
-                updateAll(); updateSidebar();
+                updateAll(); 
+                updateSidebar();
             });
+
             filtersContainer.querySelectorAll('.company-checkbox').forEach(cb => cb.addEventListener('change', () => {
                 const name = cb.value;
                 if (cb.checked) state.activeCompanies.add(name); else state.activeCompanies.delete(name);
                 updateAll();
-                const allChecked = companies.every(c => state.activeCompanies.has(c));
-                document.getElementById('toggle-all-companies').checked = allChecked;
+                document.getElementById('toggle-all-companies').checked = companies.every(c => state.activeCompanies.has(c));
             }));
             lucide.createIcons();
         };
+
         const createChart = (id, type, data, options) => new Chart(document.getElementById(id).getContext('2d'), { type, data, options });
         
-        // Funções utilitárias
         const showNotification = (message, type = 'success') => {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
             document.body.appendChild(notification);
-            
             setTimeout(() => notification.classList.add('show'), 100);
             setTimeout(() => {
                 notification.classList.remove('show');
@@ -596,96 +315,32 @@
         const addLoadingState = () => { document.body.classList.add('loading'); };
         const removeLoadingState = () => { document.body.classList.remove('loading'); };
         
-        const updateGeralCharts = (filteredDebitos, filteredDre) => {
-            const resultadoPorEmpresa = filteredDre.reduce((acc, { empresa, tipo, valor }) => {
-                if (!acc[empresa]) acc[empresa] = 0;
-                if (tipo === 'Receita') acc[empresa] += valor;
-                if (tipo === 'Despesa') acc[empresa] -= valor;
-                return acc;
-            }, {});
-            charts.geralResultado.data.labels = Object.keys(resultadoPorEmpresa);
-            charts.geralResultado.data.datasets[0].data = Object.values(resultadoPorEmpresa);
-            charts.geralResultado.update();
-            
-            const dividaPorEmpresa = filteredDebitos.reduce((acc, { empresa, situacao, valor }) => {
-                if (!acc[empresa]) acc[empresa] = { vencido: 0, aVencer: 0 };
-                if (situacao === 'Vencido') acc[empresa].vencido += valor;
-                else acc[empresa].aVencer += valor;
-                return acc;
-            }, {});
-            charts.geralDivida.data.labels = Object.keys(dividaPorEmpresa);
-            charts.geralDivida.data.datasets[0].data = Object.values(dividaPorEmpresa).map(d => d.vencido);
-            charts.geralDivida.data.datasets[1].data = Object.values(dividaPorEmpresa).map(d => d.aVencer);
-            charts.geralDivida.update();
-        };
-
-        // Event listener de inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            // Configuração dos Gráficos
             Chart.defaults.font.family = 'Inter';
             Chart.defaults.color = '#6b7280';
-            charts.geralResultado = createChart('geral-resultado-empresa-chart', 'bar', { datasets: [{ label: 'Resultado Líquido', backgroundColor: 'rgba(30, 64, 175, 0.8)', borderRadius: 4 }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } });
-            charts.geralDivida = createChart('geral-divida-empresa-chart', 'bar', { datasets: [{ label: 'Vencido', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 2 }, { label: 'A Vencer', backgroundColor: 'rgba(245, 158, 11, 0.8)', borderRadius: 2 }] }, { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } });
             charts.debtByType = createChart('debtByTypeChart', 'doughnut', { datasets: [{ backgroundColor: ['#1e40af', '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#9ca3af', '#6b7280'], borderWidth: 4 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } });
             charts.debtByCompany = createChart('debtByCompanyChart', 'bar', { datasets: [{ label: 'Vencido', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 2 }, { label: 'A Vencer', backgroundColor: 'rgba(245, 158, 11, 0.8)', borderRadius: 2 }] }, { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } });
-            charts.expensesByType = createChart('expensesByTypeChart', 'doughnut', { datasets: [{ backgroundColor: ['#ef4444', '#f87171', '#fca5a5', '#fecaca'], borderWidth: 4 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } });
-            charts.revenueVsExpenses = createChart('revenueVsExpensesChart', 'bar', { datasets: [{ label: 'Receitas', backgroundColor: 'rgba(34, 197, 94, 0.8)', borderRadius: 4 }, { label: 'Despesas', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 4 }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } });
 
-            // População dos Filtros
             document.getElementById('filter-situacao').innerHTML = [...new Set(debitosData.map(d => d.situacao))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-tipo-debito').innerHTML = [...new Set(debitosData.map(d => d.tipo))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-mes-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.mes))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-categoria-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.categoria))].map(v => `<option value="${v}">${v}</option>`).join('');
-            document.getElementById('filter-tipo-conciliacao').innerHTML = [...new Set(conciliacaoData.map(d => d.tipo))].map(v => `<option value="${v}">${v}</option>`).join('');
             
-            // Configuração dos Eventos
             setupEventListeners();
             
-            // Event listeners para botões de exportar e atualizar
             document.getElementById('export-btn').addEventListener('click', () => {
                 addLoadingState();
                 setTimeout(() => {
                     const companyFilter = (d) => state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa);
-                    let dataToExport = [];
-                    let filename = '';
+                    const situacoes = getMultiValues('filter-situacao');
+                    const startDate = document.getElementById('start-date-filter').value ? new Date(document.getElementById('start-date-filter').value + 'T00:00:00') : null;
+                    const endDate = document.getElementById('end-date-filter').value ? new Date(document.getElementById('end-date-filter').value + 'T23:59:59') : null;
                     
-                    switch(state.activeTab) {
-                        case 'geral':
-                             // A aba geral mostra um resumo dos débitos, então exportamos os débitos filtrados por empresa.
-                            dataToExport = debitosData.filter(companyFilter);
-                            filename = 'dados_gerais_debitos.csv';
-                            break;
-                        case 'dre':
-                             // Para a DRE, aplicamos o filtro de empresa e os filtros específicos da aba.
-                            const meses = getMultiValues('filter-mes-conciliacao');
-                            const categorias = getMultiValues('filter-categoria-conciliacao');
-                            const tipos = getMultiValues('filter-tipo-conciliacao');
-                            dataToExport = conciliacaoData.filter(d => 
-                                companyFilter(d) &&
-                                (meses.length === 0 || meses.includes(d.mes)) && 
-                                (categorias.length === 0 || categorias.includes(d.categoria)) && 
-                                (tipos.length === 0 || tipos.includes(d.tipo))
-                            );
-                            filename = 'dados_dre.csv';
-                            break;
-                        case 'debitos':
-                            // Para débitos, aplicamos o filtro de empresa e os filtros da aba de débitos.
-                            const situacoes = getMultiValues('filter-situacao');
-                            const tiposDebito = getMultiValues('filter-tipo-debito');
-                            const startDate = document.getElementById('start-date-filter').value ? new Date(document.getElementById('start-date-filter').value + 'T00:00:00') : null;
-                            const endDate = document.getElementById('end-date-filter').value ? new Date(document.getElementById('end-date-filter').value + 'T23:59:59') : null;
-                            dataToExport = debitosData.filter(d => 
-                                companyFilter(d) &&
-                                (!startDate || parseDebitosDate(d.vencimento) >= startDate) && 
-                                (!endDate || parseDebitosDate(d.vencimento) <= endDate) && 
-                                (situacoes.length === 0 || situacoes.includes(d.situacao)) && 
-                                (tiposDebito.length === 0 || tiposDebito.includes(d.tipo))
-                            );
-                            filename = 'dados_debitos.csv';
-                            break;
-                    }
+                    const dataToExport = debitosData.filter(d => 
+                        companyFilter(d) &&
+                        (!startDate || parseDebitosDate(d.vencimento) >= startDate) && 
+                        (!endDate || parseDebitosDate(d.vencimento) <= endDate) && 
+                        (situacoes.length === 0 || situacoes.includes(d.situacao))
+                    );
                     
-                    exportToCSV(dataToExport, filename);
+                    exportToCSV(dataToExport, 'dados_debitos.csv');
                     removeLoadingState();
                 }, 500);
             });
@@ -699,11 +354,9 @@
                 }, 800);
             });
 
-            // Primeira Carga
             updateSidebar();
             updateAll();
         });
     </script>
 </body>
 </html>
-
