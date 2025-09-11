@@ -1,362 +1,955 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Débitos | Sete Soluções</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1e40af; --secondary: #3b82f6; --background: #f1f5f9; --card-bg: #ffffff;
-            --text-primary: #111827; --text-secondary: #6b7280; --danger: #ef4444; --success: #22c55e;
-            --warning: #f59e0b; --border-color: #e5e7eb;
+            --primary: #2563eb; --primary-hover: #1d4ed8; --secondary: #3b82f6; --background: #f1f5f9; 
+            --card-bg: #ffffff; --text-primary: #111827; --text-secondary: #6b7280; --danger: #ef4444; 
+            --success: #22c55e; --warning: #f59e0b; --border-color: #e5e7eb;
+            --subtle-bg: #f8fafc;
         }
-        body { font-family: 'Inter', sans-serif; background-color: var(--background); color: var(--text-primary); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+        html.dark {
+            --primary: #3b82f6; --primary-hover: #60a5fa; --background: #0f172a; --card-bg: #1e293b;
+            --text-primary: #f1f5f9; --text-secondary: #94a3b8; --border-color: #334155;
+            --subtle-bg: #1a2435;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--background); 
+            color: var(--text-primary); 
+            -webkit-font-smoothing: antialiased; 
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
         .sidebar { background-color: var(--card-bg); border-right: 1px solid var(--border-color); }
         .kpi-card { background: var(--card-bg); border-radius: 0.75rem; box-shadow: 0 4px 12px -1px rgba(0,0,0,0.05); transition: all 0.3s ease; border: 1px solid var(--border-color); }
         .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px -3px rgba(0,0,0,0.07); }
         .chart-card { background-color: var(--card-bg); border-radius: 0.75rem; box-shadow: 0 4px 12px -1px rgba(0,0,0,0.05); padding: 1.5rem; border: 1px solid var(--border-color); }
-        .table-container { border-radius: 0 0 0.75rem 0.75rem; overflow: hidden; border: 1px solid var(--border-color); border-top: none; }
-        .table-header th { background-color: #f9fafb; color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; user-select: none; }
-        .table-row:hover { background-color: #f3f4f6; }
-        .filter-bar { background-color: #ffffff; padding: 1rem 1.5rem; border-radius: 0.75rem 0.75rem 0 0; border: 1px solid var(--border-color); box-shadow: 0 4px 12px -1px rgba(0,0,0,0.05); }
-        .filter-input { background-color: #f9fafb; border: 1px solid var(--border-color); border-radius: 0.5rem; transition: all 0.2s ease; }
-        .filter-input:focus { background-color: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2); outline: none; }
-        .sort-icon { opacity: 0.4; transition: all 0.2s ease-in-out; }
+        .table-container { border-radius: 0.75rem; overflow: hidden; border: 1px solid var(--border-color); background-color: var(--card-bg); }
+        .table-header th { background-color: var(--card-bg); color: var(--text-secondary); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border-color); }
+        
+        .table-row.overdue { background-color: color-mix(in srgb, var(--danger) 5%, transparent); }
+        .table-row:not(.sub-row):hover { background-color: color-mix(in srgb, var(--primary) 10%, transparent); }
+        html.dark .table-row:not(.sub-row):hover { background-color: color-mix(in srgb, var(--primary) 15%, transparent); }
+        .sub-row, .details-row { background-color: var(--subtle-bg); }
+        
+        .filter-input { background-color: var(--background); border: 1px solid var(--border-color); border-radius: 0.5rem; transition: all 0.2s ease; color: var(--text-primary); height: 42px; }
+        .filter-input:focus, .custom-select-trigger:focus { background-color: var(--card-bg); border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent); outline: none; }
+        
+        .sort-icon { opacity: 0.3; transition: all 0.2s ease-in-out; }
         .sort-icon.active { opacity: 1; color: var(--primary); }
-        .tab-button.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .app-header { background-image: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.90)); box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
-        .sidebar label { border-radius: 0.5rem; transition: background-color 0.2s ease, color 0.2s ease; }
-        .sidebar label:hover { background-color: #eff6ff; }
-        .sidebar input[type="checkbox"] { accent-color: var(--primary); }
-        .filter-grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr)); gap: 0.75rem; align-items: end; }
-        .filter-field { grid-column: span 4 / span 4; min-width: 200px; }
-        .filter-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: .04em; }
-        .filter-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.25rem; height: 1.25rem; padding: 0 0.35rem; border-radius: 9999px; background: #e5edff; color: #1e40af; font-size: 0.7rem; font-weight: 700; }
-        .filter-actions { grid-column: span 4 / span 4; display: flex; gap: 0.5rem; justify-content: flex-end; }
-        .loading { opacity: 0.6; pointer-events: none; }
+        .app-header { background-color: color-mix(in srgb, var(--card-bg) 95%, transparent); backdrop-filter: blur(8px); }
+        .sidebar label:hover { background-color: color-mix(in srgb, var(--primary) 10%, transparent); }
+        .sidebar input[type="checkbox"] { accent-color: var(--primary); flex-shrink: 0; }
+        
+        .loading-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .loading-overlay.show { opacity: 1; pointer-events: auto; }
+        .spinner { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: var(--primary); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .tooltip { position: relative; }
-        .tooltip:hover::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; white-space: nowrap; z-index: 50; }
-        .export-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; }
-        .export-btn:hover { background: linear-gradient(135deg, #059669, #047857); }
-        .table-row:nth-child(even) { background-color: #f9fafb; }
-        .table-row:nth-child(odd) { background-color: #ffffff; }
-        .notification { position: fixed; top: 1rem; right: 1rem; padding: 1rem; border-radius: 0.5rem; color: white; z-index: 1000; transform: translateX(100%); transition: transform 0.3s ease; }
-        .notification.show { transform: translateX(0); }
-        .notification.success { background: #10b981; }
-        .notification.error { background: #ef4444; }
+        .tooltip:hover::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-4px); background: #1f2937; color: white; padding: 0.5rem; border-radius: 0.375rem; font-size: 0.75rem; white-space: nowrap; z-index: 50; }
+        .pagination-btn { background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-secondary); }
+        .pagination-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+        .pagination-btn.active { background-color: var(--primary); color: white; border-color: var(--primary); }
+        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .filter-drawer { transform: translateX(100%); transition: transform 0.3s ease-in-out; }
+        .filter-drawer.open { transform: translateX(0); }
+        .filter-overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out; background-color: rgba(0,0,0,0.4); }
+        .filter-overlay.open { opacity: 1; pointer-events: auto; }
+        .filter-badge { position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px; font-size: 11px; }
+
+        .custom-select-container { position: relative; }
+        .custom-select-trigger { display: flex; align-items: center; justify-content: space-between; background-color: var(--background); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 0 0.75rem; cursor: pointer; width: 100%; height: 42px; }
+        .custom-select-options { position: absolute; top: 100%; left: 0; right: 0; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 0.5rem; margin-top: 0.25rem; z-index: 50; max-height: 200px; overflow-y: auto; opacity: 0; transform: scaleY(0.95); pointer-events: none; transition: opacity 0.1s ease, transform 0.1s ease; }
+        .custom-select-container.open .custom-select-options { opacity: 1; transform: scaleY(1); pointer-events: auto; }
+        .custom-select-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; cursor: pointer; }
+        .custom-select-option:hover { background-color: color-mix(in srgb, var(--primary) 10%, transparent); }
+        .custom-select-option input[type="checkbox"] { accent-color: var(--primary); }
+        
+        .kpi-value-update { animation: text-pop 0.4s ease-out; }
+        @keyframes text-pop { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+        
+        .kpi-value {
+            white-space: nowrap;
+            line-height: 1;
+            /* Fórmula de dimensionamento de fonte aprimorada para se adaptar ao zoom e ao layout. */
+            /* Base para layouts de 2 e 3 colunas (móvel e tablet) */
+            font-size: clamp(0.75rem, 1rem + 2vw, 2.25rem);
+        }
+        @media (min-width: 1280px) { /* Ecrãs XL, quando a grelha tem 6 colunas */
+            /* Em ecrãs largos, os cartões são mais estreitos, então a escala é mais suave. */
+            .kpi-value {
+                font-size: clamp(0.75rem, 1rem + 1.2vw, 1.75rem);
+            }
+        }
+        
     </style>
 </head>
 <body class="flex min-h-screen">
 
-    <aside id="sidebar" class="sidebar w-72 flex-shrink-0 p-4 flex flex-col">
+    <div id="loading-overlay" class="loading-overlay"><div class="spinner"></div></div>
+    
+    <div id="sidebar-overlay" class="filter-overlay fixed inset-0 z-30 lg:hidden"></div>
+
+    <aside id="sidebar" class="sidebar w-72 flex-shrink-0 p-4 flex-col fixed inset-y-0 left-0 z-40 transition-transform -translate-x-full lg:translate-x-0 lg:flex">
         <div class="flex items-center gap-3 mb-10 px-2">
             <div class="bg-blue-100 p-2 rounded-lg"><i data-lucide="shield-check" class="text-blue-800"></i></div>
-            <h2 class="text-xl font-bold text-gray-800">Sete Soluções</h2>
+            <h2 class="text-xl font-bold">Sete Soluções</h2>
         </div>
-        <nav id="company-filters" class="flex flex-col gap-2 flex-1">
-             <h3 class="text-sm font-semibold text-gray-400 uppercase px-3 mt-4 mb-2">Empresas</h3>
-        </nav>
+        <nav id="company-filters" class="flex flex-col gap-2 flex-1 overflow-y-auto"></nav>
     </aside>
 
-    <div class="flex-1 flex flex-col">
-        <header class="app-header backdrop-blur-sm border-b border-gray-200 p-4 flex justify-between items-center sticky top-0 z-20">
-             <h1 id="header-title" class="text-2xl font-bold text-gray-800">Débitos Fiscais</h1>
+    <div class="flex-1 flex flex-col lg:pl-72">
+        <header class="app-header border-b border-[var(--border-color)] p-4 flex justify-between items-center sticky top-0 z-30">
+             <div class="flex items-center gap-4">
+                <button id="menu-toggle" class="lg:hidden p-2 rounded-md hover:bg-[color-mix(in_srgb,var(--primary)_10%,transparent)]" aria-label="Abrir menu"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                <h1 id="header-title" class="text-xl sm:text-2xl font-bold truncate" title="Débitos Fiscais">Débitos Fiscais</h1>
+             </div>
              <div class="flex items-center gap-3">
-                 <button id="export-btn" class="export-btn px-4 py-2 rounded-lg font-medium transition-all duration-200 tooltip" data-tooltip="Exportar dados filtrados">
-                     <i data-lucide="download" class="w-4 h-4 mr-2"></i>Exportar
-                 </button>
-                 <button id="refresh-btn" class="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition tooltip" data-tooltip="Atualizar dados">
-                     <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-                 </button>
+                 <button id="theme-toggle" class="p-2 rounded-lg hover:bg-[color-mix(in_srgb,var(--primary)_10%,transparent)] transition tooltip" data-tooltip="Alternar tema" aria-label="Alternar tema escuro/claro"><i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i><i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i></button>
+                 <button id="export-btn" class="bg-[var(--success)] text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 hover:opacity-90" aria-label="Exportar dados filtrados"><i data-lucide="download" class="w-4 h-4"></i><span class="hidden sm:inline">Exportar</span></button>
+                 <button id="refresh-btn" class="p-2 bg-[color-mix(in_srgb,var(--primary)_10%,transparent)] text-[var(--primary)] rounded-lg hover:bg-[color-mix(in_srgb,var(--primary)_20%,transparent)] transition tooltip" data-tooltip="Atualizar dados" aria-label="Atualizar dados"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
              </div>
         </header>
-        
-        <div class="px-8 border-b border-gray-200 bg-white/95 backdrop-blur-sm sticky top-[73px] z-10">
-            <nav class="flex gap-4">
-                <button class="tab-button active" data-tab="debitos">Débitos Fiscais</button>
-            </nav>
-        </div>
 
-        <main class="flex-1 p-8">
-            <div id="debitos-content" class="tab-content">
-                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Total</h3><div class="bg-orange-100 p-2 rounded-md"><i data-lucide="landmark" class="text-orange-600"></i></div></div><p id="kpi-total" class="text-4xl font-bold text-orange-600 mt-2">R$ 0,00</p></div>
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Vencida</h3><div class="bg-red-100 p-2 rounded-md"><i data-lucide="alert-circle" class="text-red-600"></i></div></div><p id="kpi-vencido" class="text-4xl font-bold text-red-600 mt-2">R$ 0,00</p></div>
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">A Vencer</h3><div class="bg-yellow-100 p-2 rounded-md"><i data-lucide="calendar-check" class="text-yellow-600"></i></div></div><p id="kpi-avencer" class="text-4xl font-bold text-yellow-600 mt-2">R$ 0,00</p></div>
-                    <div class="kpi-card p-6"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Vencida (%)</h3><div class="bg-red-100 p-2 rounded-md"><i data-lucide="pie-chart" class="text-red-600"></i></div></div><p id="kpi-perc-vencido" class="text-4xl font-bold text-red-600 mt-2">0%</p></div>
-                </section>
-                <section class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
-                    <div class="chart-card lg:col-span-2 flex flex-col"><h3 class="text-lg font-bold text-gray-800 mb-4">Composição da Dívida</h3><div class="relative h-96"><canvas id="debtByTypeChart"></canvas></div></div>
-                    <div class="chart-card lg:col-span-3 flex flex-col"><h3 class="text-lg font-bold text-gray-800 mb-4">Dívida por Empresa</h3><div class="relative h-96"><canvas id="debtByCompanyChart"></canvas></div></div>
-                </section>
-                <section>
-                    <div class="filter-bar">
-                        <div class="flex items-center justify-between mb-3"><h3 class="text-xl font-bold text-gray-800">Detalhamento dos Débitos</h3></div>
-                        <div class="filter-grid">
-                            <div class="filter-field">
-                                <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Início Venc.</label>
-                                <input type="date" id="start-date-filter" class="filter-input p-2 w-full tooltip" data-tooltip="Data de vencimento inicial para filtrar débitos">
-                            </div>
-                            <div class="filter-field">
-                                <label class="filter-label"><i data-lucide="calendar" class="w-4 h-4"></i> Fim Venc.</label>
-                                <input type="date" id="end-date-filter" class="filter-input p-2 w-full tooltip" data-tooltip="Data de vencimento final para filtrar débitos">
-                            </div>
-                            <div class="filter-field">
-                                <label class="filter-label"><i data-lucide="filter" class="w-4 h-4"></i> Situação <span id="badge-situacao" class="filter-badge">0</span></label>
-                                <select id="filter-situacao" multiple class="filter-input p-2 w-full tooltip" data-tooltip="Selecione uma ou mais situações"></select>
-                            </div>
-                             <div class="filter-actions">
-                                <button id="clear-filters-btn" class="px-3 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition tooltip" data-tooltip="Limpar todos os filtros aplicados">Limpar</button>
-                            </div>
+        <main class="flex-1 p-4 sm:p-6 lg:p-8">
+            <section class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+                <div class="kpi-card p-6 flex flex-col"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Total</h3><div class="bg-orange-100 p-2 rounded-md"><i data-lucide="landmark" class="text-orange-600"></i></div></div><div class="mt-2 flex-1 flex items-end"><p id="kpi-total" class="kpi-value font-bold text-orange-600">R$ 0,00</p></div></div>
+                <div class="kpi-card p-6 flex flex-col"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Vencida</h3><div class="bg-red-100 p-2 rounded-md"><i data-lucide="alert-circle" class="text-red-600"></i></div></div><div class="mt-2 flex-1 flex items-end"><p id="kpi-vencido" class="kpi-value font-bold text-red-600">R$ 0,00</p></div></div>
+                <div class="kpi-card p-6 flex flex-col"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">A Vencer</h3><div class="bg-yellow-100 p-2 rounded-md"><i data-lucide="calendar-check" class="text-yellow-600"></i></div></div><div class="mt-2 flex-1 flex items-end"><p id="kpi-avencer" class="kpi-value font-bold text-yellow-600">R$ 0,00</p></div></div>
+                <div class="kpi-card p-6 flex flex-col"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Dívida Vencida (%)</h3><div class="bg-red-100 p-2 rounded-md"><i data-lucide="pie-chart" class="text-red-600"></i></div></div><div class="mt-2 flex-1 flex items-end"><p id="kpi-perc-vencido" class="kpi-value font-bold text-red-600">0%</p></div></div>
+                <div class="kpi-card p-6 flex flex-col"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Total Multas</h3><div class="bg-purple-100 p-2 rounded-md"><i data-lucide="receipt" class="text-purple-600"></i></div></div><div class="mt-2 flex-1 flex items-end"><p id="kpi-multas" class="kpi-value font-bold text-purple-600">R$ 0,00</p></div></div>
+                <div class="kpi-card p-6 flex flex-col"><div class="flex items-center justify-between"><h3 class="font-semibold text-gray-500 uppercase">Total Juros</h3><div class="bg-pink-100 p-2 rounded-md"><i data-lucide="trending-up" class="text-pink-600"></i></div></div><div class="mt-2 flex-1 flex items-end"><p id="kpi-juros" class="kpi-value font-bold text-pink-600">R$ 0,00</p></div></div>
+            </section>
+            
+            <section class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+                <div class="chart-card lg:col-span-2 flex flex-col"><h3 class="text-lg font-bold mb-4">Composição da Dívida</h3><div class="relative h-72 sm:h-96"><canvas id="debtByTypeChart"></canvas></div></div>
+                <div class="chart-card lg:col-span-3 flex flex-col"><h3 class="text-lg font-bold mb-4">Dívida por Empresa</h3><div class="relative h-72 sm:h-96"><canvas id="debtByCompanyChart"></canvas></div></div>
+            </section>
+            
+            <section>
+                <div class="bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-color)] mb-4 flex justify-between items-center flex-wrap gap-4">
+                    <div id="active-filters-display" class="flex flex-wrap gap-2 text-sm items-center"></div>
+                     <button id="filter-trigger-btn" class="relative flex items-center gap-2 px-4 py-2 bg-transparent text-[var(--text-secondary)] rounded-lg border border-[var(--border-color)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition">
+                        <i data-lucide="filter" class="w-4 h-4"></i>
+                        <span>Filtros</span>
+                        <span id="filter-count-badge" class="filter-badge hidden items-center justify-center rounded-full bg-blue-600 text-white">0</span>
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="table-header">
+                                <tr>
+                                    <th class="px-2 md:px-6 py-4 w-12"></th>
+                                    <th class="px-2 md:px-6 py-4" data-sort-key="nomeDebito"><div class="flex items-center gap-2">Débito<span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></div></th>
+                                    <th class="px-2 md:px-6 py-4" data-sort-key="competencia"><div class="flex items-center gap-2">Competência<span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></div></th>
+                                    <th class="px-2 md:px-6 py-4" data-sort-key="vencimento"><div class="flex items-center gap-2">Vencimento<span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></div></th>
+                                    <th class="px-2 md:px-6 py-4 text-right" data-sort-key="principal"><div class="flex items-center justify-end gap-2">Principal<span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></div></th>
+                                    <th class="px-2 md:px-6 py-4 text-right" data-sort-key="multa"><div class="flex items-center justify-end gap-2">Multa<span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></div></th>
+                                    <th class="px-2 md:px-6 py-4 text-right" data-sort-key="juros"><div class="flex items-center justify-end gap-2">Juros<span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></div></th>
+                                    <th class="px-2 md:px-6 py-4 text-right" data-sort-key="valor"><div class="flex items-center justify-end gap-2">Total<span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></div></th>
+                                    <th class="px-2 md:px-6 py-4" data-sort-key="situacao"><div class="flex items-center gap-2">Situação<span class="sort-icon"><i data-lucide="arrow-up-down"></i></span></div></th>
+                                </tr>
+                            </thead>
+                            <tbody id="debt-table-body" class="divide-y divide-[var(--border-color)]"></tbody>
+                        </table>
+                        <div id="empty-state" class="hidden text-center p-12 text-[var(--text-secondary)]">
+                            <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-4"></i>
+                            <h3 class="text-lg font-semibold">Nenhum resultado encontrado</h3>
+                            <p class="text-sm">Tente ajustar seus filtros para encontrar o que procura.</p>
                         </div>
                     </div>
-                    <div class="table-container bg-white"><div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="table-header"><tr class="bg-gray-50"><th class="px-6 py-4" data-sort-key="nomeDebito"><div class="flex items-center gap-2">Débito<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="competencia"><div class="flex items-center gap-2">Competência<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="vencimento"><div class="flex items-center gap-2">Vencimento<span class="sort-icon"></span></div></th><th class="px-6 py-4" data-sort-key="situacao"><div class="flex items-center gap-2">Situação<span class="sort-icon"></span></div></th><th class="px-6 py-4 text-right" data-sort-key="valor"><div class="flex items-center justify-end gap-2">Valor<span class="sort-icon"></span></div></th></tr></thead><tbody id="debt-table-body"></tbody></table></div></div>
-                </section>
-            </div>
+                    <div id="pagination-controls" class="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-[var(--border-color)]"></div>
+                </div>
+            </section>
         </main>
     </div>
+
+    <!-- Filter Drawer -->
+    <div id="filter-overlay" class="filter-overlay fixed inset-0 z-40"></div>
+    <div id="filter-drawer" class="filter-drawer fixed top-0 right-0 h-full w-full max-w-full sm:max-w-sm bg-[var(--card-bg)] shadow-lg z-50 flex flex-col">
+        <div class="p-6 flex justify-between items-center border-b border-[var(--border-color)]">
+            <h3 class="text-lg font-bold">Filtros</h3>
+            <button id="close-filter-drawer-btn" class="p-2 rounded-md hover:bg-[color-mix(in_srgb,var(--primary)_10%,transparent)]" aria-label="Fechar filtros"><i data-lucide="x"></i></button>
+        </div>
+        <div class="p-6 flex-1 overflow-y-auto space-y-6">
+            <div>
+                <label for="search-filter" class="text-sm font-semibold mb-2 block">Buscar por nome</label>
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                    <input type="text" id="search-filter" class="filter-input p-2 pl-9 w-full" placeholder="Nome do débito...">
+                </div>
+            </div>
+            <div>
+                <label class="text-sm font-semibold mb-2 block">Período de Vencimento</label>
+                <div class="space-y-2">
+                    <input type="date" id="start-date-filter" class="filter-input p-2 w-full" aria-label="Data de início do vencimento">
+                    <input type="date" id="end-date-filter" class="filter-input p-2 w-full" aria-label="Data de fim do vencimento">
+                </div>
+            </div>
+            <div>
+                <label for="filter-situacao-container" class="text-sm font-semibold mb-2 block">Situação</label>
+                <div id="filter-situacao-container" class="custom-select-container"></div>
+            </div>
+             <div>
+                <label for="filter-tipo-container" class="text-sm font-semibold mb-2 block">Tipo de Imposto</label>
+                <div id="filter-tipo-container" class="custom-select-container"></div>
+            </div>
+        </div>
+        <div class="p-6 flex items-center gap-4 border-t border-[var(--border-color)]">
+            <button id="clear-filters-btn" class="w-full px-4 py-2 bg-transparent text-[var(--text-secondary)] rounded-lg border border-[var(--border-color)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition">Limpar Filtros</button>
+            <button id="apply-filters-btn" class="w-full px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-hover)] transition">Aplicar</button>
+        </div>
+    </div>
     
- <script>
+ <script type="module">
         // =================================================================================
-        // BASE DE DADOS
+        // CONFIGURAÇÃO E ESTADO INICIAL
         // =================================================================================
-        const debitosDataRaw = [
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 'R$ 6.384,93', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 25.225,31', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 22.988,35', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '1º trimestre', vencimento: '30/05/2025', valor: 'R$ 3.307,78', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '1º trimestre', vencimento: '30/06/2025', valor: 'R$ 3.307,78', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 9.954,34', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'ISS (DIVIDA ATIVA)', competencia: '03/2022', vencimento: '18/04/2022', valor: 'R$ 4.055,42', situacao: 'Vencido', tipo: 'ISS' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 9.071,58', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 22.338,92', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'ISS', competencia: '08/2025', vencimento: '15/09/2025', valor: 'R$ 7.288,53', situacao: 'A vencer', tipo: 'ISS' },
-            { empresa: 'AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 8.815,31', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '1º trimestre', vencimento: '31/07/2025', valor: 'R$ 10.512,04', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 9.579,82', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 4.614,94', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 4.205,66', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 9.309,19', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 4.086,85', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'AVANT SPA LTDA - (SC)', nomeDebito: 'ISS', competencia: '08/2025', vencimento: '15/09/2025', valor: 'R$ 1.608,51', situacao: 'A vencer', tipo: 'ISS' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'Parcelamento ISS (R$ 62.692,22)', competencia: '01/12 parcelas', vencimento: '15/09/2025', valor: 'R$ 5.224,35', situacao: 'A vencer', tipo: 'Parcelamento' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 35.808,62', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 32.633,15', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 13.920,68', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 12.686,21', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 31.711,24', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'AVANTGARDE CURSOS LTDA - (SP)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 12.327,82', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ Lucro Presumido (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 22.421,01', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ Lucro Presumido (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 20.432,71', situacao: 'Vencido', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'CSLL Demais (1ª Quota)', competencia: '2º trimestre', vencimento: '31/07/2025', valor: 'R$ 10.245,99', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'CSLL Demais (2ª Quota)', competencia: '2º trimestre', vencimento: '29/08/2025', valor: 'R$ 9.337,36', situacao: 'Vencido', tipo: 'CSLL' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'IRPJ Lucro Presumido (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 19.855,48', situacao: 'A vencer', tipo: 'IRPJ' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'CSLL Demais (3ª Quota)', competencia: '2º trimestre', vencimento: '30/09/2025', valor: 'R$ 9.073,58', situacao: 'A vencer', tipo: 'CSLL' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'Parcelamento (Salvdo Devedor R$ 48.465,67)', competencia: '14/34 parcelas', vencimento: '30/09/2025', valor: 'R$ 9.693,13', situacao: 'A vencer', tipo: 'Parcelamento' },
-            { empresa: 'INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)', nomeDebito: 'Parcelamento (Salvdo Devedor R$ 12.230,84)', competencia: '02/6 parcelas', vencimento: '30/09/2025', valor: 'R$ 582,40', situacao: 'A vencer', tipo: 'Parcelamento' }
-        ];
-
-        // =================================================================================
-        // LÓGICA DO DASHBOARD
-        // =================================================================================
-        const state = { activeCompanies: new Set(), debitosSort: { key: 'vencimento', dir: 'asc' } };
-        const charts = {};
-        const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-        const parseCurrency = (str) => typeof str === 'string' ? parseFloat(str.replace(/[^0-9,-]+/g,"").replace(/\./g,'').replace(',', '.')) : str;
-        const parseDebitosDate = (d) => { const [day, month, year] = d.split('/'); return new Date(year, month - 1, day); };
-        const getMultiValues = (selectId) => { const el = document.getElementById(selectId); return Array.from(el.selectedOptions).map(o => o.value); };
         
-        const updateFilterBadges = () => {
-            const safeLen = (id) => { const el = document.getElementById(id); return el ? Array.from(el.selectedOptions).length : 0; };
-            const setBadge = (badgeId, value) => { const b = document.getElementById(badgeId); if (b) b.textContent = value; };
-            setBadge('badge-situacao', safeLen('filter-situacao'));
+        const STATUS = {
+            VENCIDO: 'VENCIDO',
+            A_VENCER: 'A VENCER',
+            ORIGEM_PARCELAMENTO: 'Origem do parcelamento'
         };
 
-        const debitosData = debitosDataRaw.map(d => ({...d, valor: parseCurrency(d.valor), empresa: d.empresa.replace(/ - \(\w+\)/, '').trim() }));
-
-        const updateAll = () => {
-            const companyFilter = (d) => state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa);
-            const debitos = debitosData.filter(companyFilter);
-            updateDebitos(debitos);
-            updateFilterBadges();
+        const state = { 
+            activeCompanies: new Set(), 
+            sort: { key: 'vencimento', dir: 'asc' },
+            pagination: { currentPage: 1, itemsPerPage: 10 },
+            filters: { search: '', startDate: '', endDate: '', situacoes: [], tipos: [], chartTipo: null },
+            tempFilters: {},
+            expandedRows: new Set()
         };
+        
+        const appData = {
+            processed: [],
+            allCompanies: [],
+            allSituacoes: [],
+            allTipos: [],
+        };
+        const charts = {};
+        
+        // =================================================================================
+        // FUNÇÕES UTILITÁRIAS
+        // =================================================================================
 
-        const updateDebitos = (data) => {
-            const situacoes = getMultiValues('filter-situacao');
-            const startDate = document.getElementById('start-date-filter').value ? new Date(document.getElementById('start-date-filter').value + 'T00:00:00') : null;
-            const endDate = document.getElementById('end-date-filter').value ? new Date(document.getElementById('end-date-filter').value + 'T23:59:59') : null;
+        const formatCurrency = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        
+        const parseNumericValue = (val) => {
+            if (typeof val === 'number') return val;
+            if (typeof val === 'string') {
+                const cleaned = val.replace(/R\$\s?/, '').trim();
+                if (cleaned === '' || cleaned === '-') return 0;
+                return parseFloat(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
+            }
+            return 0;
+        };
+        
+        const parseDate = (d) => {
+            if (typeof d !== 'string' || !d.trim()) return null;
+            const cleanedDateStr = d.trim();
+            const parts = cleanedDateStr.split('/');
+            if (parts.length !== 3) return null;
+
+            // Assumindo estritamente o formato MM/DD/YYYY do JSON
+            const month = parseInt(parts[0], 10);
+            const day = parseInt(parts[1], 10);
+            let year = parseInt(parts[2], 10);
+
+            if (year < 100) { year += 2000; }
+
+            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
             
-            const filtered = data.filter(d => 
-                (!startDate || parseDebitosDate(d.vencimento) >= startDate) && 
-                (!endDate || parseDebitosDate(d.vencimento) <= endDate) && 
-                (situacoes.length === 0 || situacoes.includes(d.situacao))
-            );
+            const date = new Date(year, month - 1, day);
+            
+            if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+                return null;
+            }
+            return isNaN(date.getTime()) ? null : date;
+        };
 
-            const dividaTotal = filtered.reduce((sum, item) => sum + item.valor, 0);
-            const dividaVencida = filtered.filter(d => d.situacao === 'Vencido').reduce((sum, item) => sum + item.valor, 0);
-            const dividaAVencer = dividaTotal - dividaVencida;
+        const formatCompetencia = (competenciaStr) => {
+            if (typeof competenciaStr !== 'string') return competenciaStr;
 
-            document.getElementById('kpi-total').textContent = formatCurrency(dividaTotal);
-            document.getElementById('kpi-vencido').textContent = formatCurrency(dividaVencida);
-            document.getElementById('kpi-avencer').textContent = formatCurrency(dividaAVencer);
-            document.getElementById('kpi-perc-vencido').textContent = dividaTotal > 0 ? `${((dividaVencida / dividaTotal) * 100).toFixed(0)}%` : '0%';
+            const monthMap = {
+                'jan': '01', 'feb': '02', 'mar': '03', 'apr': '04', 'may': '05', 'jun': '06',
+                'jul': '07', 'aug': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dec': '12'
+            };
+            
+            const match = competenciaStr.toLowerCase().match(/([a-z]{3})-?(\d{2})/);
+            if (match) {
+                const month = monthMap[match[1]];
+                const year = `20${match[2]}`;
+                if (month) return `${month}/${year}`;
+            }
+            return competenciaStr;
+        };
 
-            const byType = filtered.reduce((acc, d) => { acc[d.tipo] = (acc[d.tipo] || 0) + d.valor; return acc; }, {});
+        const getCssVar = (varName) => getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        const showLoading = () => document.getElementById('loading-overlay').classList.add('show');
+        const hideLoading = () => document.getElementById('loading-overlay').classList.remove('show');
+        
+        // =================================================================================
+        // LÓGICA DE DADOS
+        // =================================================================================
+        
+        const loadData = () => {
+            return new Promise(resolve => {
+                const debitosDataRaw = [
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 3ª Quota","Competência":"1º Trimestre","Vencimento Original":"06/30/2025","Principal":5080.31,"Multa":1016.06,"Juros":288.56,"Total":6384.93,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 1ª Quota","Competência":"2º Trimestre","Vencimento Original":"07/31/2025","Principal":21866.61,"Multa":3030.71,"Juros":472.31,"Total":25369.63,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 2ª Quota","Competência":"2º Trimestre","Vencimento Original":"08/29/2025","Principal":21866.61,"Multa":793.75,"Juros":472.31,"Total":23132.67,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"CSLL DEMAIS 2ª Quota","Competência":"1º Trimestre","Vencimento Original":"05/30/2025","Principal":2631.91,"Multa":526.38,"Juros":149.49,"Total":3307.78,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"CSLL DEMAIS 3ª Quota","Competência":"1º Trimestre","Vencimento Original":"06/30/2025","Principal":2631.91,"Multa":526.38,"Juros":149.49,"Total":3307.78,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"CSLL DEMAIS 1ª Quota","Competência":"2º Trimestre","Vencimento Original":"07/31/2025","Principal":8628.94,"Multa":1195.97,"Juros":186.38,"Total":10011.29,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"CSLL DEMAIS 2ª Quota","Competência":"2º Trimestre","Vencimento Original":"08/29/2025","Principal":8628.93,"Multa":313.23,"Juros":186.38,"Total":9128.54,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"Contribuições sobre a folha","Competência":"Aug-25","Vencimento Original":"09/19/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":7243.94,"Situação":"A VENCER"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"PIS","Competência":"Aug-25","Vencimento Original":"09/25/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":2368.77,"Situação":"A VENCER"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"COFINS","Competência":"Aug-25","Vencimento Original":"09/25/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":10932.8,"Situação":"A VENCER"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"ISS","Competência":"Aug-25","Vencimento Original":"09/15/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":7288.53,"Situação":"A VENCER"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"ISS (DIVIDA ATIVA)","Competência":"Mar-22","Vencimento Original":"04/18/2022","Principal":2758.98,"Multa":137.95,"Juros":1158.49,"Total":4065.42,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"CSLL DEMAIS 2ª Quota","Competência":"2º Trimestre","Vencimento Original":"09/30/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":472.31,"Total":22338.92,"Situação":"A VENCER"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 3ª Quota","Competência":"2º Trimestre","Vencimento Original":"09/30/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":186.38,"Total":8815.31,"Situação":"A VENCER"},
+                    {"EMPRESA":"AGUIAR DUARTE SERVICOS MEDICOS LTDA - (SC)","Nome do Débito":"FGTS","Competência":"Aug-25","Vencimento Original":"09/19/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":1268.55,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"PIS","Competência":"Aug-25","Vencimento Original":"09/25/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":437.75,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"COFINS","Competência":"Aug-25","Vencimento Original":"09/25/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":2020.37,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"Contribuições sobre a folha","Competência":"Aug-25","Vencimento Original":"09/19/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":4573.53,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 1ª Quota","Competência":"2º Trimestre","Vencimento Original":"07/31/2025","Principal":9112.39,"Multa":1262.97,"Juros":196.82,"Total":10572.18,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 2ª Quota","Competência":"2º Trimestre","Vencimento Original":"08/29/2025","Principal":9112.37,"Multa":330.77,"Juros":196.82,"Total":9639.96,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 3ª Quota","Competência":"2º Trimestre","Vencimento Original":"09/30/2025","Principal":9112.37,"Multa":" R$ - ","Juros":196.82,"Total":9309.19,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"CSLL DEMAIS 1ª Quota","Competência":"2º Trimestre","Vencimento Original":"07/31/2025","Principal":4000.47,"Multa":554.46,"Juros":86.41,"Total":4641.34,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"CSLL DEMAIS 2ª Quota","Competência":"2º Trimestre","Vencimento Original":"08/29/2025","Principal":4000.45,"Multa":145.21,"Juros":86.4,"Total":4232.06,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"CSLL DEMAIS 3ª Quota","Competência":"2º Trimestre","Vencimento Original":"09/30/2025","Principal":4000.45,"Multa":" R$ - ","Juros":86.4,"Total":4086.85,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"ISS","Competência":"Aug-25","Vencimento Original":"09/15/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":1608.51,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANT SPA LTDA - (SC)","Nome do Débito":"FGTS","Competência":"Aug-25","Vencimento Original":"09/19/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":882.6,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"PIS","Competência":"Aug-25","Vencimento Original":"09/25/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":416.77,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"COFINS","Competência":"Aug-25","Vencimento Original":"09/25/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":1923.54,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"Contribuições sobre a folha","Competência":"Aug-25","Vencimento Original":"09/19/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":5959.04,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 1ª Quota","Competência":"2º Trimestre","Vencimento Original":"07/31/2025","Principal":31040.76,"Multa":4302.24,"Juros":670.48,"Total":36013.48,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"CSLL LUCRO PRESUMIDO 1ª Quota","Competência":"2º Trimestre","Vencimento Original":"07/31/2025","Principal":12067.17,"Multa":1672.5,"Juros":260.65,"Total":14000.32,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 2ª Quota","Competência":"2º Trimestre","Vencimento Original":"08/29/2025","Principal":31040.76,"Multa":1126.77,"Juros":670.48,"Total":32838.01,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"CSLL LUCRO PRESUMIDO 2ª Quota","Competência":"2º Trimestre","Vencimento Original":"08/29/2025","Principal":12067.17,"Multa":438.03,"Juros":260.65,"Total":12765.85,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 3ª Quota","Competência":"2º Trimestre","Vencimento Original":"09/30/2025","Principal":31040.76,"Multa":" R$ - ","Juros":670.48,"Total":31711.24,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"ISS","Competência":"Aug-25","Vencimento Original":"09/15/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":7.52,"Total":2281.2,"Situação":"VENCIDO"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"CSLL LUCRO PRESUMIDO 3ª Quota","Competência":"2º Trimestre","Vencimento Original":"09/30/2025","Principal":12067.17,"Multa":" R$ - ","Juros":260.65,"Total":12327.82,"Situação":"A VENCER"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"FGTS","Competência":"Aug-25","Vencimento Original":"09/19/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":747.99,"Situação":"A VENCER"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"Contribuições sobre a folha","Competência":"Aug-25","Vencimento Original":"09/19/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":10685.35,"Situação":"A VENCER"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"PIS","Competência":"Aug-25","Vencimento Original":"09/25/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":9784.25,"Situação":"A VENCER"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"COFINS","Competência":"Aug-25","Vencimento Original":"09/25/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":2119.92,"Situação":"A VENCER"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 1ª Quota","Competência":"2º Trimestre","Vencimento Original":"07/31/2025","Principal":19435.69,"Multa":2693.78,"Juros":419.81,"Total":22549.28,"Situação":"VENCIDO"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"CSLL LUCRO PRESUMIDO 1ª Quota","Competência":"2º Trimestre","Vencimento Original":"07/31/2025","Principal":8881.76,"Multa":1231.01,"Juros":191.84,"Total":10304.61,"Situação":"VENCIDO"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 2ª Quota","Competência":"2º Trimestre","Vencimento Original":"08/29/2025","Principal":19435.67,"Multa":705.51,"Juros":419.81,"Total":20560.99,"Situação":"VENCIDO"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"CSLL LUCRO PRESUMIDO 2ª Quota","Competência":"2º Trimestre","Vencimento Original":"08/29/2025","Principal":8881.74,"Multa":322.4,"Juros":191.84,"Total":9395.98,"Situação":"VENCIDO"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"IRPJ LUCRO PRESUMIDO 3ª Quota","Competência":"2º Trimestre","Vencimento Original":"09/30/2025","Principal":19435.67,"Multa":" R$ - ","Juros":419.81,"Total":19855.48,"Situação":"A VENCER"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"CSLL LUCRO PRESUMIDO 3ª Quota","Competência":"2º Trimestre","Vencimento Original":"09/30/2025","Principal":8881.74,"Multa":" R$ - ","Juros":191.84,"Total":9073.58,"Situação":"A VENCER"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"ISS","Competência":"Aug-25","Vencimento Original":"09/15/2025","Principal":6522.69,"Multa":8.23,"Juros":" R$ - ","Total":6530.92,"Situação":"VENCIDO"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"Parcelamento (Valor total R$ 17.494,61)","Competência":"14/34 parcelas","Vencimento Original":"09/30/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":582.4,"Situação":"A VENCER","Column10":"Saldo devedor 12.230,84"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"Multa por Atraso na Entrega da DCTF","Competência":2023,"Vencimento Original":"12/20/2023","Principal":171.61,"Multa":34.32,"Juros":12.04,"Total":217.97,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"Multa por Atraso na Entrega da ECF","Competência":2023,"Vencimento Original":"12/20/2023","Principal":453.17,"Multa":90.63,"Juros":31.81,"Total":575.61,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"Multa por Atraso na Entrega da ECD","Competência":2023,"Vencimento Original":"12/20/2023","Principal":56.64,"Multa":11.32,"Juros":3.97,"Total":71.93,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"Multa por Atraso na Entrega da EFD-Contribuições","Competência":2023,"Vencimento Original":"12/20/2023","Principal":4.53,"Multa":0.9,"Juros":0.31,"Total":5.74,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIologia HUMANA LTDA (SP)","Nome do Débito":"Multa por Atraso na Entrega da EFD-Reinf","Competência":2023,"Vencimento Original":"12/20/2023","Principal":13.59,"Multa":2.71,"Juros":0.95,"Total":17.25,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"Multa por Atraso na Entrega da GFIP/SEFIP","Competência":2023,"Vencimento Original":"12/20/2023","Principal":56.64,"Multa":11.32,"Juros":3.97,"Total":71.93,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"Parcelamento - Paes - Pessoa Jurídica","Competência":"Feb-24","Vencimento Original":"04/26/2024","Principal":500,"Multa":0,"Juros":17.65,"Total":517.65,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"IOF","Competência":2023,"Vencimento Original":"12/20/2023","Principal":45.31,"Multa":9.06,"Juros":3.18,"Total":57.55,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"COFINS","Competência":"Feb-24","Vencimento Original":"03/25/2024","Principal":936.33,"Multa":187.26,"Juros":41.38,"Total":1164.97,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"CSLL","Competência":"4º Trimestre/2023","Vencimento Original":"01/31/2024","Principal":650.88,"Multa":130.17,"Juros":39.37,"Total":820.42,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"PIS/Pasep - Faturamento","Competência":"Nov-23","Vencimento Original":"12/20/2023","Principal":5204.64,"Multa":1040.92,"Juros":365.36,"Total":6610.92,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"PIS/Pasep - Faturamento","Competência":"Dec-23","Vencimento Original":"01/19/2024","Principal":5204.64,"Multa":1040.92,"Juros":314.88,"Total":6560.44,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"IRPJ","Competência":"Feb-24","Vencimento Original":"03/25/2024","Principal":202.87,"Multa":40.57,"Juros":8.96,"Total":252.4,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"CP Patronal - Retenção","Competência":"Aug-23","Vencimento Original":"09/20/2023","Principal":423.5,"Multa":84.7,"Juros":41.63,"Total":549.83,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"Parcelamento (Valor total R$48.465,67)","Competência":"2/06 parcelas","Vencimento Original":"09/30/2025","Principal":0,"Multa":0,"Juros":0,"Total":9597.16,"Situação":"A VENCER","Column10":"Saldo devedor 48.465,67"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"IRPJ - Lucro Presumido","Competência":"1º Trimestre/2025","Vencimento Original":"04/30/2025","Principal":24423.39,"Multa":4884.67,"Juros":1103.93,"Total":30411.99,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"INSTITUTO DE FISIOLOGIA HUMANA LTDA (SP)","Nome do Débito":"COFINS","Competência":"Mar-25","Vencimento Original":"04/25/2025","Principal":21820.59,"Multa":4364.11,"Juros":986.29,"Total":27170.99,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"Parcelamento (Valor total R$ 62.692,22)","Competência":"01/12 parcelas","Vencimento Original":"09/15/2025","Principal":" R$ - ","Multa":" R$ - ","Juros":" R$ - ","Total":5224.35,"Situação":"A VENCER","Column10":"Saldo devedor 62.692,22"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"ISS","Competência":"May-25","Vencimento Original":"06/10/2025","Principal":51087.03,"Multa":10217.4,"Juros":1164.78,"Total":62469.21,"Situação":"Origem do parcelamento"},
+                    {"EMPRESA":"AVANTGARDE CURSOS LTDA - (SP)","Nome do Débito":"ISS","Competência":"Jun-25","Vencimento Original":"07/10/2025","Principal":192.5,"Multa":28.58,"Juros":1.93,"Total":223.01,"Situação":"Origem do parcelamento"}
+                ];
+                setTimeout(() => resolve(debitosDataRaw), 750);
+            });
+        };
+
+        const extractType = (name) => {
+            if (typeof name !== 'string') return 'Outro';
+            const lowerName = name.toLowerCase();
+            if (lowerName.includes('irpj')) return 'IRPJ';
+            if (lowerName.includes('csll')) return 'CSLL';
+            if (lowerName.includes('pis')) return 'PIS';
+            if (lowerName.includes('cofins')) return 'COFINS';
+            if (lowerName.includes('iss')) return 'ISS';
+            if (lowerName.includes('parcelamento')) return 'Parcelamento';
+            if (lowerName.includes('fgts')) return 'FGTS';
+            if (lowerName.includes('iof')) return 'IOF';
+            return 'Outro';
+        }
+        
+        const parseInstallmentDetails = (row) => {
+            const competenceRegex = /(\d+)\/(\d+)/;
+            const totalValueRegex = /valor total R\$ ([\d.,]+)/i;
+            const balanceRegex = /saldo devedor ([\d.,]+)/i;
+
+            const competenceMatch = row['Competência']?.match(competenceRegex);
+            const totalValueMatch = row['Nome do Débito']?.match(totalValueRegex);
+            const balanceMatch = row['Nome do Débito']?.match(balanceRegex) || row['Column10']?.match(balanceRegex);
+
+            return {
+                paidCount: competenceMatch ? parseInt(competenceMatch[1]) : null,
+                totalCount: competenceMatch ? parseInt(competenceMatch[2]) : null,
+                totalValue: totalValueMatch ? parseNumericValue(totalValueMatch[1]) : null,
+                remainingBalance: balanceMatch ? parseNumericValue(balanceMatch[1]) : null,
+            };
+        };
+        
+        const processData = (rawData) => {
+            const sanitizedData = rawData.map(row => {
+                if (row.hasOwnProperty(' Total ')) {
+                    row.Total = row[' Total '];
+                    delete row[' Total '];
+                }
+                return row;
+            });
+
+            return sanitizedData.reduce((acc, row) => {
+                if(!row['EMPRESA'] || !row['Nome do Débito']) return acc;
+
+                const competenciaStr = String(row['Competência']);
+                const commonData = {
+                    empresa: row['EMPRESA']?.replace(/ - \(\w+\)/, '').trim(),
+                    nomeDebito: row['Nome do Débito'],
+                    competencia: competenciaStr,
+                    competenciaFormatada: formatCompetencia(competenciaStr),
+                    vencimento: row['Vencimento Original'],
+                    principal: parseNumericValue(row['Principal']),
+                    multa: parseNumericValue(row['Multa']),
+                    juros: parseNumericValue(row['Juros']),
+                    valor: parseNumericValue(row['Total']),
+                    situacao: row['Situação'],
+                    tipo: extractType(row['Nome do Débito'])
+                };
+                
+                if (commonData.tipo === 'Parcelamento') {
+                    commonData.installmentDetails = parseInstallmentDetails(row);
+                }
+                
+                if (row['Situação'] === STATUS.ORIGEM_PARCELAMENTO) {
+                    const lastParcelamento = [...acc].reverse().find(d => d.tipo === 'Parcelamento' && d.empresa === commonData.empresa);
+                    if (lastParcelamento) {
+                        if (!lastParcelamento.subRows) lastParcelamento.subRows = [];
+                        lastParcelamento.subRows.push(commonData);
+                    } else {
+                         acc.push(commonData);
+                    }
+                } else {
+                    acc.push(commonData);
+                }
+                return acc;
+            }, []);
+        };
+
+        const getFilteredData = () => {
+            const { search, startDate, endDate, situacoes, tipos, chartTipo } = state.filters;
+            const searchLower = search ? search.toLowerCase() : '';
+            
+            return appData.processed.filter(d => {
+                const dateVencimento = parseDate(d.vencimento);
+                const mainRowMatch = (
+                    (state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa)) &&
+                    (!searchLower || d.nomeDebito.toLowerCase().includes(searchLower)) &&
+                    (!startDate || (dateVencimento && dateVencimento >= new Date(startDate + 'T00:00:00Z'))) &&
+                    (!endDate || (dateVencimento && dateVencimento <= new Date(endDate + 'T23:59:59Z'))) &&
+                    (situacoes.length === 0 || situacoes.includes(d.situacao)) &&
+                    (tipos.length === 0 || tipos.includes(d.tipo)) &&
+                    (!chartTipo || d.tipo === chartTipo)
+                );
+                return mainRowMatch;
+            });
+        }
+        
+        // =================================================================================
+        // FUNÇÕES DE RENDERIZAÇÃO E ATUALIZAÇÃO DA UI
+        // =================================================================================
+
+        const updateHeaderTitle = () => {
+            const titleEl = document.getElementById('header-title');
+            const numActive = state.activeCompanies.size;
+            const total = appData.allCompanies.length;
+            let title = 'Débitos Fiscais';
+
+            if (numActive > 0 && numActive < total) {
+                if (numActive === 1) {
+                    title = [...state.activeCompanies][0];
+                } else {
+                    title = `${numActive} Empresas Selecionadas`;
+                }
+            } else {
+                title = 'Todas as Empresas';
+            }
+            titleEl.textContent = title;
+            titleEl.title = title;
+        };
+
+        const renderSidebar = () => {
+            const container = document.getElementById('company-filters');
+            container.innerHTML = `<h3 class="text-sm font-semibold text-gray-400 uppercase px-3 mt-4 mb-2">Empresas</h3>` +
+                `<label class="flex items-center gap-3 px-3 py-2 cursor-pointer rounded-md"><input id="toggle-all-companies" type="checkbox" class="w-5 h-5 flex-shrink-0" ${state.activeCompanies.size === appData.allCompanies.length ? 'checked' : ''}/><span class="text-sm font-medium">Selecionar todas</span></label>` +
+                appData.allCompanies.map(c => `<label class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium cursor-pointer"><input type="checkbox" class="company-checkbox w-5 h-5 flex-shrink-0" value="${c}" ${state.activeCompanies.has(c) ? 'checked' : ''}/><i data-lucide="building-2" class="w-5 h-5 text-blue-700 flex-shrink-0"></i><span class="truncate">${c}</span></label>`).join('');
+            
+            lucide.createIcons();
+            
+            document.getElementById('toggle-all-companies').addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                state.activeCompanies.clear();
+                if (isChecked) {
+                    appData.allCompanies.forEach(c => state.activeCompanies.add(c));
+                }
+                container.querySelectorAll('.company-checkbox').forEach(cb => cb.checked = isChecked);
+                state.pagination.currentPage = 1;
+                updateAll();
+            });
+
+            container.querySelectorAll('.company-checkbox').forEach(cb => cb.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    state.activeCompanies.add(e.target.value);
+                } else {
+                    state.activeCompanies.delete(e.target.value);
+                }
+                state.pagination.currentPage = 1;
+                document.getElementById('toggle-all-companies').checked = appData.allCompanies.length === state.activeCompanies.size;
+                updateAll();
+            }));
+        };
+
+        const renderActiveFilters = () => {
+            const container = document.getElementById('active-filters-display');
+            container.innerHTML = '<span class="font-medium mr-2 shrink-0">Filtros Ativos:</span>';
+            let count = 0;
+
+            const createRemovableBadge = (text, filterKey, valueToRemove = null) => {
+                const badge = document.createElement('span');
+                badge.className = 'flex items-center gap-1.5 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs';
+                badge.innerHTML = `<span>${text}</span><button class="remove-filter-btn p-0.5 rounded-full hover:bg-blue-200" aria-label="Remover filtro ${text}"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+                badge.querySelector('button').addEventListener('click', () => {
+                    if (Array.isArray(state.filters[filterKey])) {
+                         state.filters[filterKey] = state.filters[filterKey].filter(v => v !== valueToRemove);
+                    } else {
+                        state.filters[filterKey] = null;
+                    }
+                    updateAll();
+                });
+                return badge;
+            };
+
+            if (state.filters.search) { container.appendChild(createRemovableBadge(`Busca: ${state.filters.search}`, 'search')); count++; }
+            if (state.filters.startDate) { container.appendChild(createRemovableBadge(`Início: ${state.filters.startDate}`, 'startDate')); count++; }
+            if (state.filters.endDate) { container.appendChild(createRemovableBadge(`Fim: ${state.filters.endDate}`, 'endDate')); count++; }
+            state.filters.situacoes.forEach(s => { container.appendChild(createRemovableBadge(s, 'situacoes', s)); count++; });
+            state.filters.tipos.forEach(t => { container.appendChild(createRemovableBadge(t, 'tipos', t)); count++; });
+            if (state.filters.chartTipo) { container.appendChild(createRemovableBadge(`Tipo: ${state.filters.chartTipo}`, 'chartTipo')); count++; }
+
+            const badgeCounter = document.getElementById('filter-count-badge');
+            if (count > 0) {
+                badgeCounter.textContent = count;
+                badgeCounter.classList.remove('hidden');
+                badgeCounter.classList.add('flex');
+            } else {
+                badgeCounter.classList.add('hidden');
+                badgeCounter.classList.remove('flex');
+                container.innerHTML += '<span class="text-[var(--text-secondary)] text-xs">Nenhum</span>';
+            }
+            lucide.createIcons();
+        };
+
+        const renderKPIs = (data) => {
+            const dataToConsider = data.filter(d => d.situacao !== STATUS.ORIGEM_PARCELAMENTO);
+            const flatData = data.flatMap(d => d.subRows ? [d, ...d.subRows] : [d]);
+            
+            const dividaTotal = dataToConsider.reduce((sum, item) => sum + item.valor, 0);
+            const dividaVencida = dataToConsider.filter(d => d.situacao === STATUS.VENCIDO).reduce((sum, item) => sum + item.valor, 0);
+            const totalMultas = flatData.reduce((sum, item) => sum + item.multa, 0);
+            const totalJuros = flatData.reduce((sum, item) => sum + item.juros, 0);
+
+            const updateKpiElement = (id, value) => {
+                const el = document.getElementById(id);
+                if (el.textContent !== value) {
+                    el.textContent = value;
+                    el.classList.add('kpi-value-update');
+                    el.addEventListener('animationend', () => el.classList.remove('kpi-value-update'), {once: true});
+                }
+            }
+
+            updateKpiElement('kpi-total', formatCurrency(dividaTotal));
+            updateKpiElement('kpi-vencido', formatCurrency(dividaVencida));
+            updateKpiElement('kpi-avencer', formatCurrency(dividaTotal - dividaVencida));
+            updateKpiElement('kpi-perc-vencido', dividaTotal > 0 ? `${((dividaVencida / dividaTotal) * 100).toFixed(0)}%` : '0%');
+            updateKpiElement('kpi-multas', formatCurrency(totalMultas));
+            updateKpiElement('kpi-juros', formatCurrency(totalJuros));
+        };
+
+        const renderCharts = (data) => {
+            const dataToConsider = data.filter(d => d.situacao !== STATUS.ORIGEM_PARCELAMENTO);
+            const byType = dataToConsider.reduce((acc, d) => { acc[d.tipo] = (acc[d.tipo] || 0) + d.valor; return acc; }, {});
             charts.debtByType.data.labels = Object.keys(byType);
             charts.debtByType.data.datasets[0].data = Object.values(byType);
             charts.debtByType.update();
 
-            const byCompany = filtered.reduce((acc, { empresa, situacao, valor }) => {
+            const byCompany = dataToConsider.reduce((acc, { empresa, situacao, valor }) => {
                 if (!acc[empresa]) acc[empresa] = { vencido: 0, aVencer: 0 };
-                if (situacao === 'Vencido') acc[empresa].vencido += valor; else acc[empresa].aVencer += valor;
+                if (situacao === STATUS.VENCIDO) acc[empresa].vencido += valor; else acc[empresa].aVencer += valor;
                 return acc;
             }, {});
+            
+            // Atualiza cores e dados do gráfico de barras
             charts.debtByCompany.data.labels = Object.keys(byCompany);
+            charts.debtByCompany.data.datasets[0].backgroundColor = getCssVar('--danger');
             charts.debtByCompany.data.datasets[0].data = Object.values(byCompany).map(d => d.vencido);
+            charts.debtByCompany.data.datasets[1].backgroundColor = getCssVar('--warning');
             charts.debtByCompany.data.datasets[1].data = Object.values(byCompany).map(d => d.aVencer);
             charts.debtByCompany.update();
-            
+        };
+
+        const renderTableAndPagination = (data) => {
             const tableBody = document.getElementById('debt-table-body');
-            const sorted = filtered.sort((a, b) => {
-                const key = state.debitosSort.key;
-                let aVal = a[key];
-                let bVal = b[key];
-                if (key === 'vencimento') { aVal = parseDebitosDate(a.vencimento); bVal = parseDebitosDate(b.vencimento); }
-                if (key === 'valor') { aVal = a.valor; bVal = b.valor; }
-                if (aVal > bVal) return state.debitosSort.dir === 'asc' ? 1 : -1;
-                if (aVal < bVal) return state.debitosSort.dir === 'asc' ? -1 : 1;
+            const emptyStateEl = document.getElementById('empty-state');
+            const paginationContainer = document.getElementById('pagination-controls');
+            tableBody.innerHTML = ''; 
+            
+            if (data.length === 0) {
+                emptyStateEl.classList.remove('hidden');
+                paginationContainer.innerHTML = '';
+                return;
+            }
+            emptyStateEl.classList.add('hidden');
+
+            const { key, dir } = state.sort;
+            const sorted = [...data].sort((a, b) => {
+                let aVal = a[key], bVal = b[key];
+                if (key === 'vencimento') { aVal = parseDate(a.vencimento); bVal = parseDate(b.vencimento); }
+                if (aVal > bVal) return dir === 'asc' ? 1 : -1;
+                if (aVal < bVal) return dir === 'asc' ? -1 : 1;
                 return 0;
             });
-            tableBody.innerHTML = sorted.map(d => `<tr class="table-row border-b"><td class="px-6 py-4 font-semibold">${d.nomeDebito}</td><td class="px-6 py-4">${d.competencia}</td><td class="px-6 py-4">${d.vencimento}</td><td class="px-6 py-4"><span class="px-2.5 py-1 text-xs font-semibold rounded-full ${d.situacao === 'Vencido' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">${d.situacao}</span></td><td class="px-6 py-4 text-right font-bold">${formatCurrency(d.valor)}</td></tr>`).join('');
+
+            const { currentPage, itemsPerPage } = state.pagination;
+            const paginatedItems = sorted.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+            
+            const cellPadding = 'px-2 py-3 md:px-6 md:py-4';
+            const subCellPadding = 'pl-6 pr-2 py-3 md:pl-10 md:pr-6 md:py-4';
+
+            paginatedItems.forEach((d, index) => {
+                const rowId = `row-${currentPage}-${index}`;
+                const isExpanded = state.expandedRows.has(rowId);
+                const isOverdue = d.situacao === STATUS.VENCIDO;
+                const row = document.createElement('tr');
+                row.className = `table-row ${isOverdue ? 'overdue' : ''}`;
+
+                const vencimentoDate = parseDate(d.vencimento);
+                
+                row.innerHTML = `
+                    <td class="${cellPadding}">${d.subRows ? `<button class="expander-btn p-1" data-row-id="${rowId}" aria-label="Expandir detalhes"><i data-lucide="chevron-right" class="transition-transform ${isExpanded ? 'rotate-90' : ''}"></i></button>` : ''}</td>
+                    <td class="${cellPadding} font-medium">${d.nomeDebito}</td>
+                    <td class="${cellPadding}">${d.competenciaFormatada}</td>
+                    <td class="${cellPadding}">${vencimentoDate ? vencimentoDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A'}</td>
+                    <td class="${cellPadding} text-right">${formatCurrency(d.principal)}</td>
+                    <td class="${cellPadding} text-right">${formatCurrency(d.multa)}</td>
+                    <td class="${cellPadding} text-right">${formatCurrency(d.juros)}</td>
+                    <td class="${cellPadding} text-right font-semibold">${formatCurrency(d.valor)}</td>
+                    <td class="${cellPadding}"><span class="px-2.5 py-1 text-xs font-semibold rounded-full ${isOverdue ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">${d.situacao}</span></td>
+                `;
+                tableBody.appendChild(row);
+
+                if (isExpanded && d.subRows) {
+                    if (d.installmentDetails) {
+                        const { paidCount, totalCount, remainingBalance, totalValue } = d.installmentDetails;
+                        const remainingCount = totalCount && paidCount ? totalCount - paidCount : null;
+                        const detailsRow = document.createElement('tr');
+                        detailsRow.className = 'details-row';
+                        detailsRow.innerHTML = `
+                            <td class="${cellPadding}" colspan="9">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-md bg-sky-50 dark:bg-sky-900/20 text-sm">
+                                    ${totalValue ? `<div><strong>Valor Total:</strong> ${formatCurrency(totalValue)}</div>` : ''}
+                                    ${remainingBalance ? `<div><strong>Saldo Devedor:</strong> ${formatCurrency(remainingBalance)}</div>` : ''}
+                                    ${paidCount ? `<div><strong>Parcelas Pagas:</strong> ${paidCount} de ${totalCount || 'N/A'}</div>` : ''}
+                                    ${remainingCount !== null ? `<div><strong>Parcelas Restantes:</strong> ${remainingCount}</div>` : ''}
+                                </div>
+                            </td>`;
+                        tableBody.appendChild(detailsRow);
+                    }
+                    d.subRows.forEach(sub => {
+                        const subRow = document.createElement('tr');
+                        subRow.className = 'sub-row';
+                        const subVencimentoDate = parseDate(sub.vencimento);
+                        subRow.innerHTML = `
+                            <td></td>
+                            <td class="${subCellPadding} text-[var(--text-secondary)]"><span class="mr-2">└</span> ${sub.nomeDebito}</td>
+                            <td class="${cellPadding} text-[var(--text-secondary)]">${sub.competenciaFormatada}</td>
+                            <td class="${cellPadding} text-[var(--text-secondary)]">${subVencimentoDate ? subVencimentoDate.toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : 'N/A'}</td>
+                            <td class="${cellPadding} text-right text-[var(--text-secondary)]">${formatCurrency(sub.principal)}</td>
+                            <td class="${cellPadding} text-right text-[var(--text-secondary)]">${formatCurrency(sub.multa)}</td>
+                            <td class="${cellPadding} text-right text-[var(--text-secondary)]">${formatCurrency(sub.juros)}</td>
+                            <td class="${cellPadding} text-right text-[var(--text-secondary)]">${formatCurrency(sub.valor)}</td>
+                            <td class="${cellPadding}"><span class="text-xs text-[var(--text-secondary)]">${sub.situacao}</span></td>
+                        `;
+                        tableBody.appendChild(subRow);
+                    });
+                }
+            });
+            
+            tableBody.querySelectorAll('.expander-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const rowId = btn.dataset.rowId;
+                    if (state.expandedRows.has(rowId)) state.expandedRows.delete(rowId);
+                    else state.expandedRows.add(rowId);
+                    renderTableAndPagination(data);
+                });
+            });
+
+            document.querySelectorAll('.table-header th').forEach(th => {
+                const iconContainer = th.querySelector('.sort-icon');
+                if(iconContainer) {
+                    iconContainer.classList.toggle('active', th.dataset.sortKey === key);
+                    iconContainer.innerHTML = th.dataset.sortKey === key 
+                        ? (dir === 'asc' ? '<i data-lucide="arrow-up"></i>' : '<i data-lucide="arrow-down"></i>')
+                        : '<i data-lucide="arrow-up-down"></i>';
+                }
+            });
+            
+            const totalItems = sorted.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            
+            if (totalPages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            paginationContainer.innerHTML = `
+                <div class="text-sm text-[var(--text-secondary)]">Mostrando ${((currentPage - 1) * itemsPerPage) + 1} a ${Math.min(currentPage * itemsPerPage, totalItems)} de ${totalItems} resultados</div>
+                <div class="flex items-center gap-2">
+                    <button id="prev-page" class="pagination-btn p-2 rounded-md" ${currentPage === 1 ? 'disabled' : ''} aria-label="Página anterior"><i data-lucide="chevron-left"></i></button>
+                    <span class="text-sm font-medium">Página ${currentPage} de ${totalPages}</span>
+                    <button id="next-page" class="pagination-btn p-2 rounded-md" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Próxima página"><i data-lucide="chevron-right"></i></button>
+                </div>`;
+            
+            document.getElementById('prev-page')?.addEventListener('click', () => { if(state.pagination.currentPage > 1) { state.pagination.currentPage--; updateAll(); } });
+            document.getElementById('next-page')?.addEventListener('click', () => { if(state.pagination.currentPage < totalPages) { state.pagination.currentPage++; updateAll(); } });
+            
+            lucide.createIcons();
         };
         
-        const setupEventListeners = () => {
-            document.querySelectorAll('#start-date-filter, #end-date-filter, #filter-situacao').forEach(el => el.addEventListener('change', () => { updateAll(); }));
-            document.getElementById('clear-filters-btn').addEventListener('click', () => { 
-                document.getElementById('start-date-filter').value = ''; 
-                document.getElementById('end-date-filter').value = ''; 
-                document.getElementById('filter-situacao').selectedIndex = -1;
-                updateAll(); 
+        const createCustomSelect = (containerId, options, filterKey) => {
+            const container = document.getElementById(containerId);
+            const selectedCount = state.tempFilters[filterKey].length;
+            const triggerText = selectedCount === 0 ? `Selecione...` : `${selectedCount} selecionado(s)`;
+            
+            container.innerHTML = `
+                <button type="button" class="custom-select-trigger"><span>${triggerText}</span><i data-lucide="chevron-down" class="w-4 h-4 transition-transform"></i></button>
+                <div class="custom-select-options">${options.map(o => `<label class="custom-select-option"><input type="checkbox" value="${o}" ${state.tempFilters[filterKey].includes(o) ? 'checked' : ''}><span>${o}</span></label>`).join('')}</div>`;
+            
+            const trigger = container.querySelector('.custom-select-trigger');
+            trigger.addEventListener('click', () => container.classList.toggle('open'));
+
+            container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const value = checkbox.value;
+                    const currentValues = state.tempFilters[filterKey];
+                    state.tempFilters[filterKey] = checkbox.checked ? [...currentValues, value] : currentValues.filter(v => v !== value);
+                    trigger.querySelector('span').textContent = state.tempFilters[filterKey].length === 0 ? `Selecione...` : `${state.tempFilters[filterKey].length} selecionado(s)`;
+                });
             });
-            document.querySelectorAll('#debitos-content .table-header th').forEach(th => th.addEventListener('click', () => { 
-                const key = th.dataset.sortKey; 
-                if (key) { 
-                    state.debitosSort.dir = state.debitosSort.key === key && state.debitosSort.dir === 'asc' ? 'desc' : 'asc'; 
-                    state.debitosSort.key = key; 
-                    updateAll(); 
-                }
-            }));
         };
 
-        const updateSidebar = () => {
-            const companies = [...new Set(debitosData.map(d => d.empresa))];
-            if (state.activeCompanies.size === 0) companies.forEach(c => state.activeCompanies.add(c));
-            
-            const filtersContainer = document.getElementById('company-filters');
-            filtersContainer.innerHTML = `<h3 class="text-sm font-semibold text-gray-400 uppercase px-3 mt-4 mb-2">Empresas</h3>` +
-                `<label class="flex items-center gap-3 px-3 py-2"><input id="toggle-all-companies" type="checkbox" class="w-4 h-4" ${state.activeCompanies.size === companies.length ? 'checked' : ''}/><span class="text-sm font-medium text-gray-900">Selecionar todas</span></label>` +
-                companies.map(c => `<label class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-gray-800"><input type="checkbox" class="company-checkbox w-4 h-4" value="${c}" ${state.activeCompanies.has(c) ? 'checked' : ''}/><i data-lucide="building-2" class="w-5 h-5 text-blue-700"></i><span>${c}</span></label>`).join('');
-            
-            const allToggle = document.getElementById('toggle-all-companies');
-            allToggle.addEventListener('change', () => {
-                state.activeCompanies.clear();
-                if (allToggle.checked) companies.forEach(c => state.activeCompanies.add(c));
-                updateAll(); 
-                updateSidebar();
-            });
-
-            filtersContainer.querySelectorAll('.company-checkbox').forEach(cb => cb.addEventListener('change', () => {
-                const name = cb.value;
-                if (cb.checked) state.activeCompanies.add(name); else state.activeCompanies.delete(name);
-                updateAll();
-                document.getElementById('toggle-all-companies').checked = companies.every(c => state.activeCompanies.has(c));
-            }));
+        const updateAll = () => {
+            const filteredData = getFilteredData();
+            renderKPIs(filteredData);
+            renderCharts(filteredData);
+            renderTableAndPagination(filteredData);
+            renderActiveFilters();
+            updateHeaderTitle();
             lucide.createIcons();
         };
 
-        const createChart = (id, type, data, options) => new Chart(document.getElementById(id).getContext('2d'), { type, data, options });
-        
-        const showNotification = (message, type = 'success') => {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.classList.add('show'), 100);
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => document.body.removeChild(notification), 300);
-            }, 3000);
-        };
-
-        const exportToCSV = (data, filename) => {
-            if (data.length === 0) {
-                showNotification('Nenhum dado para exportar', 'error');
-                return;
-            }
-            const headers = Object.keys(data[0]);
-            const csvContent = [
-                headers.join(','),
-                ...data.map(row => headers.map(header => `"${row[header]}"`).join(','))
-            ].join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-            showNotification('Dados exportados com sucesso!');
-        };
-
-        const addLoadingState = () => { document.body.classList.add('loading'); };
-        const removeLoadingState = () => { document.body.classList.remove('loading'); };
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            Chart.defaults.font.family = 'Inter';
-            Chart.defaults.color = '#6b7280';
-            charts.debtByType = createChart('debtByTypeChart', 'doughnut', { datasets: [{ backgroundColor: ['#1e40af', '#1d4ed8', '#2563eb', '#3b82f6', '#60a5fa', '#9ca3af', '#6b7280'], borderWidth: 4 }] }, { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } });
-            charts.debtByCompany = createChart('debtByCompanyChart', 'bar', { datasets: [{ label: 'Vencido', backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 2 }, { label: 'A Vencer', backgroundColor: 'rgba(245, 158, 11, 0.8)', borderRadius: 2 }] }, { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } });
-
-            document.getElementById('filter-situacao').innerHTML = [...new Set(debitosData.map(d => d.situacao))].map(v => `<option value="${v}">${v}</option>`).join('');
+        const setupEventListeners = () => {
+            // Ordenação da tabela
+            document.querySelectorAll('.table-header th[data-sort-key]').forEach(th => th.addEventListener('click', () => { 
+                const key = th.dataset.sortKey; 
+                if (key) { 
+                    state.sort.dir = state.sort.key === key && state.sort.dir === 'asc' ? 'desc' : 'asc'; 
+                    state.sort.key = key; 
+                    updateAll(); 
+                }
+            }));
             
-            setupEventListeners();
-            
+            // Botões de ação do cabeçalho
+            document.getElementById('refresh-btn').addEventListener('click', async () => { 
+                showLoading(); 
+                const rawData = await loadData();
+                appData.processed = processData(rawData);
+                updateAll();
+                hideLoading();
+            });
             document.getElementById('export-btn').addEventListener('click', () => {
-                addLoadingState();
+                showLoading();
                 setTimeout(() => {
-                    const companyFilter = (d) => state.activeCompanies.size === 0 || state.activeCompanies.has(d.empresa);
-                    const situacoes = getMultiValues('filter-situacao');
-                    const startDate = document.getElementById('start-date-filter').value ? new Date(document.getElementById('start-date-filter').value + 'T00:00:00') : null;
-                    const endDate = document.getElementById('end-date-filter').value ? new Date(document.getElementById('end-date-filter').value + 'T23:59:59') : null;
-                    
-                    const dataToExport = debitosData.filter(d => 
-                        companyFilter(d) &&
-                        (!startDate || parseDebitosDate(d.vencimento) >= startDate) && 
-                        (!endDate || parseDebitosDate(d.vencimento) <= endDate) && 
-                        (situacoes.length === 0 || situacoes.includes(d.situacao))
-                    );
-                    
-                    exportToCSV(dataToExport, 'dados_debitos.csv');
-                    removeLoadingState();
+                    const dataToExport = getFilteredData();
+                    const headers = ["Empresa", "Nome do Débito", "Competência", "Vencimento", "Principal", "Multa", "Juros", "Total", "Situação"];
+                    const flatData = dataToExport.flatMap(row => row.subRows ? [row, ...row.subRows.map(sub => ({...sub, nomeDebito: `  └ ${sub.nomeDebito}`}))] : [row]);
+                    const csvContent = [ headers.join(';'), ...flatData.map(d => [d.empresa, d.nomeDebito, d.competencia, d.vencimento, d.principal, d.multa, d.juros, d.valor, d.situacao].map(val => `"${String(val ?? '').replace(/"/g, '""')}"`).join(';')) ].join('\n');
+                    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'relatorio_debitos.csv';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    hideLoading();
                 }, 500);
             });
-            
-            document.getElementById('refresh-btn').addEventListener('click', () => {
-                addLoadingState();
-                setTimeout(() => {
-                    updateAll();
-                    showNotification('Dados atualizados!');
-                    removeLoadingState();
-                }, 800);
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                updateAll();
             });
+            
+            // Lógica do menu lateral (sidebar) para telemóveis
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebarOverlay.classList.toggle('open');
+            }
+            document.getElementById('menu-toggle').addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
 
-            updateSidebar();
+            // Lógica do painel de filtros (drawer)
+            const drawer = document.getElementById('filter-drawer'), overlay = document.getElementById('filter-overlay'), openBtn = document.getElementById('filter-trigger-btn'), closeBtn = document.getElementById('close-filter-drawer-btn'), applyBtn = document.getElementById('apply-filters-btn'), clearBtn = document.getElementById('clear-filters-btn');
+            const openDrawer = () => {
+                state.tempFilters = JSON.parse(JSON.stringify(state.filters));
+                document.getElementById('search-filter').value = state.tempFilters.search;
+                document.getElementById('start-date-filter').value = state.tempFilters.startDate;
+                document.getElementById('end-date-filter').value = state.tempFilters.endDate;
+                createCustomSelect('filter-situacao-container', appData.allSituacoes, 'situacoes');
+                createCustomSelect('filter-tipo-container', appData.allTipos, 'tipos');
+                drawer.classList.add('open');
+                overlay.classList.add('open');
+            };
+            const closeDrawer = () => { 
+                drawer.classList.remove('open'); 
+                overlay.classList.remove('open');
+            };
+            openBtn.addEventListener('click', openDrawer);
+            closeBtn.addEventListener('click', closeDrawer);
+            overlay.addEventListener('click', closeDrawer);
+
+            applyBtn.addEventListener('click', () => {
+                state.filters.search = document.getElementById('search-filter').value;
+                state.filters.startDate = document.getElementById('start-date-filter').value;
+                state.filters.endDate = document.getElementById('end-date-filter').value;
+                state.filters.situacoes = state.tempFilters.situacoes;
+                state.filters.tipos = state.tempFilters.tipos;
+                state.pagination.currentPage = 1;
+                state.filters.chartTipo = null; 
+                updateAll();
+                closeDrawer();
+            });
+            clearBtn.addEventListener('click', () => {
+                state.filters = { search: '', startDate: '', endDate: '', situacoes: [], tipos: [], chartTipo: null };
+                state.pagination.currentPage = 1;
+                updateAll();
+                closeDrawer();
+            });
+        };
+        
+        // =================================================================================
+        // INICIALIZAÇÃO DO DASHBOARD
+        // =================================================================================
+
+        const initializeDashboard = async () => {
+            showLoading();
+            if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+            
+            const rawData = await loadData();
+            appData.processed = processData(rawData);
+
+            appData.allCompanies = [...new Set(rawData.map(d => d['EMPRESA']?.replace(/ - \(\w+\)/, '').trim()).filter(Boolean))].sort();
+            appData.allSituacoes = [...new Set(appData.processed.map(d => d.situacao).filter(Boolean))].filter(s => s !== STATUS.ORIGEM_PARCELAMENTO);
+            appData.allTipos = [...new Set(appData.processed.flatMap(d => d.subRows ? [d.tipo, ...d.subRows.map(s => s.tipo)] : [d.tipo]).filter(Boolean))];
+
+            appData.allCompanies.forEach(c => state.activeCompanies.add(c));
+            
+            Chart.defaults.font.family = 'Inter';
+            const isMobile = window.innerWidth < 768;
+            const chartColor = () => document.documentElement.classList.contains('dark') ? '#94a3b8' : '#6b7280';
+            const chartGridColor = () => document.documentElement.classList.contains('dark') ? '#334155' : '#e5e7eb';
+            
+            const CHART_COLORS = [ '#3b82f6', '#8b5cf6', '#10b981', '#f97316', '#ec4899', '#6366f1', '#f59e0b', '#14b8a6'];
+
+            charts.debtByType = new Chart(document.getElementById('debtByTypeChart').getContext('2d'), { 
+                type: 'doughnut', 
+                data: { datasets: [{ backgroundColor: CHART_COLORS, borderWidth: 0 }] }, 
+                options: { 
+                    responsive: true, maintainAspectRatio: false, cutout: '70%', 
+                    plugins: { 
+                        legend: { 
+                            position: isMobile ? 'top' : 'bottom', 
+                            labels: { color: chartColor(), boxWidth: 12, padding: 15 } 
+                        } 
+                    },
+                    onClick: (evt, elements) => {
+                        if (elements.length > 0) {
+                            const label = charts.debtByType.data.labels[elements[0].index];
+                            state.filters.chartTipo = state.filters.chartTipo === label ? null : label;
+                            state.pagination.currentPage = 1;
+                            updateAll();
+                        }
+                    }
+                } 
+            });
+            
+            charts.debtByCompany = new Chart(document.getElementById('debtByCompanyChart').getContext('2d'), { 
+                type: 'bar', 
+                data: { datasets: [{ label: 'Vencido', borderRadius: 4 }, { label: 'A Vencer', borderRadius: 4 }] }, 
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    scales: { 
+                        x: { stacked: true, ticks: { color: chartColor() }, grid: { color: 'transparent' } }, 
+                        y: { stacked: true, ticks: { color: chartColor() }, grid: { color: chartGridColor() } } 
+                    },
+                    plugins: { 
+                        legend: { 
+                            position: isMobile ? 'top' : 'bottom',
+                            labels: { color: chartColor() } 
+                        } 
+                    },
+                } 
+            });
+            
+            renderSidebar();
+            setupEventListeners();
             updateAll();
-        });
+            hideLoading();
+        };
+
+        // Inicia a aplicação
+        initializeDashboard();
     </script>
 </body>
 </html>
+
+
